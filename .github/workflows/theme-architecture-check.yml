@@ -1,0 +1,155 @@
+name: Theme Architecture Check
+
+on:
+  push:
+    branches:
+      - refactor/theme-maintenance-architecture
+  pull_request:
+    paths:
+      - 'saas_theme/hooks.py'
+      - 'saas_theme/public/css/**'
+      - 'saas_theme/public/js/**'
+      - 'THEME_MAINTENANCE.md'
+      - 'scripts/validate_theme_architecture.py'
+      - 'scripts/validate_theme_late_loaders.py'
+      - 'scripts/test_stability_runtime.js'
+      - 'scripts/test_report_filter_geometry.js'
+      - 'scripts/test_report_list_readability.py'
+      - 'scripts/test_grid_currency_link_icon_visibility.py'
+      - 'scripts/test_home_dashboard.py'
+      - 'scripts/test_home_dashboard_ui.js'
+      - 'scripts/test_home_visuals_and_picker.js'
+      - 'scripts/test_home_v10_layout.js'
+      - 'saas_theme/home.py'
+      - 'saas_theme/language.py'
+      - 'scripts/test_language_settings.py'
+      - 'scripts/test_language_switcher.js'
+      - 'scripts/validate_phase3c_css_bundle.py'
+      - 'scripts/validate_phase3d_popup_bundle.py'
+      - 'scripts/validate_phase3e_overlay_bundle.py'
+      - 'scripts/audit_runtime_asset_references.py'
+      - 'scripts/validate_phase4_canonical_names.py'
+      - 'scripts/validate_phase4b_stability_asset.py'
+      - 'scripts/validate_phase4c_child_table_assets.py'
+      - 'scripts/validate_phase4d_controls_assets.py'
+      - 'scripts/validate_phase4e_search_report_overrides.py'
+      - 'scripts/validate_phase4f_header_profile_asset.py'
+      - 'scripts/test_header_profile_repair.js'
+      - 'scripts/test_native_workspace_dashboard.py'
+      - 'scripts/test_native_dashboard_view.py'
+      - 'scripts/test_native_design_v2.py'
+      - 'scripts/test_native_design_v2.js'
+      - 'scripts/test_modern_sidebar.py'
+      - 'scripts/test_modern_sidebar.js'
+      - 'scripts/test_desk_header_search.js'
+      - 'scripts/test_desk_header_search_scope.py'
+      - 'scripts/test_form_autocomplete_rtl.py'
+      - 'scripts/test_rtl_kpi_form_readability.py'
+      - 'scripts/test_mobile_sidebar_grid_rtl.py'
+      - 'scripts/test_grid_selection_profile_menu.py'
+      - 'scripts/test_modal_navbar_profile_responsive.py'
+      - 'scripts/test_grid_selection_runtime.js'
+      - 'scripts/check_theme_deployment.sh'
+      - 'README.md'
+      - 'scripts/test_search_report_refinements.js'
+      - 'scripts/test_child_table_runtime.js'
+      - '.github/workflows/theme-architecture-check.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate theme architecture
+        run: python3 scripts/validate_theme_architecture.py
+      - name: Validate late-loaded asset dependencies
+        run: python3 scripts/validate_theme_late_loaders.py
+      - name: Validate stability controller syntax and behavior
+        run: |
+          node --check saas_theme/public/js/stability_refinement_v3.js
+          node scripts/test_stability_runtime.js
+      - name: Validate Phase 3C stylesheet byte parity
+        run: python3 scripts/validate_phase3c_css_bundle.py
+      - name: Validate Phase 3D popup CSS cascade parity
+        run: python3 scripts/validate_phase3d_popup_bundle.py
+      - name: Validate Phase 3E overlay CSS cascade parity
+        run: python3 scripts/validate_phase3e_overlay_bundle.py
+      - name: Audit Phase 3F live CSS and JS references
+        run: python3 scripts/audit_runtime_asset_references.py
+      - name: Validate Phase 4 canonical CSS rename integrity
+        run: python3 scripts/validate_phase4_canonical_names.py
+      - name: Validate Phase 4B stability CSS and loader parity
+        run: python3 scripts/validate_phase4b_stability_asset.py
+      - name: Validate Phase 4C exact child-table UI assets
+        run: |
+          python3 scripts/validate_phase4c_child_table_assets.py
+          node --check saas_theme/public/js/child_table_ui.js
+          node --check saas_theme/public/js/user_theme_menu.js
+          node scripts/test_child_table_runtime.js
+      - name: Validate Phase 4D v6 foundation CSS and JS parity
+        run: |
+          python3 scripts/validate_phase4d_controls_assets.py
+          node --check saas_theme/public/js/control_search_report.js
+      - name: Validate Phase 4E final search and report overrides
+        run: |
+          python3 scripts/validate_phase4e_search_report_overrides.py
+          node --check saas_theme/public/js/search_report_refinements.js
+          node scripts/test_search_report_refinements.js
+      - name: Validate Phase 4F late header/profile controller integrity
+        run: |
+          python3 scripts/validate_phase4f_header_profile_asset.py
+          node --check saas_theme/public/js/header_profile_repair.js
+          node scripts/test_header_profile_repair.js
+      - name: Validate report filter geometry and controller syntax
+        run: |
+          node --check saas_theme/public/js/search_report_refinements.js
+          node scripts/test_report_filter_geometry.js
+      - name: Validate List and Report View readability without DataTable geometry changes
+        run: python3 scripts/test_report_list_readability.py
+      - name: Validate inline Currency amounts and Link Clear icons
+        run: python3 scripts/test_grid_currency_link_icon_visibility.py
+      - name: Validate personal language switching and menu placement
+        run: |
+          python3 -m py_compile saas_theme/language.py
+          python3 scripts/test_language_settings.py
+          node --check saas_theme/public/js/brand_shell.js
+          node scripts/test_language_switcher.js
+      - name: Validate separate Home-style native dashboard and Workspace designs
+        run: |
+          python3 scripts/test_native_design_v2.py
+          node --check saas_theme/public/js/workspace_dashboard.js
+          node --check saas_theme/public/js/native_dashboard_view.js
+          node scripts/test_native_design_v2.js
+      - name: Validate modern navigation/sidebar search and compact Workspaces
+        run: |
+          python3 scripts/test_modern_sidebar.py
+          node --check saas_theme/public/js/workspace_sidebar_design.js
+          node scripts/test_modern_sidebar.js
+          python3 scripts/test_desk_header_search_scope.py
+          node --check saas_theme/public/js/desk_header_search.js
+          node scripts/test_desk_header_search.js
+          python3 scripts/test_form_autocomplete_rtl.py
+          python3 scripts/test_rtl_kpi_form_readability.py
+          python3 scripts/test_mobile_sidebar_grid_rtl.py
+          python3 scripts/test_grid_selection_profile_menu.py
+          python3 scripts/test_modal_navbar_profile_responsive.py
+          node --check saas_theme/public/js/grid_row_selection_repair.js
+          node scripts/test_grid_selection_runtime.js
+          node --check saas_theme/public/js/mobile_shell.js
+          node --check saas_theme/public/js/brand_shell.js
+      - name: Validate deployment checker shell syntax
+        run: bash -n scripts/check_theme_deployment.sh
+      - name: Validate native Dashboard View card and chart styling
+        run: python3 scripts/test_native_dashboard_view.py
+      - name: Validate native ERPNext Workspace dashboard styling
+        run: python3 scripts/test_native_workspace_dashboard.py
+      - name: Validate Home permission and finance analytics
+        run: |
+          python3 -m py_compile saas_theme/home.py
+          python3 scripts/test_home_dashboard.py
+          node --check saas_theme/public/js/home_dashboard.js
+          node --check saas_theme/public/js/home_analytics.js
+          node scripts/test_home_dashboard_ui.js
+          node --check saas_theme/public/js/quick_access_preferences.js
+          node scripts/test_home_visuals_and_picker.js
+          node scripts/test_home_v10_layout.js

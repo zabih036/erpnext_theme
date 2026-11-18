@@ -1,0 +1,320 @@
+/*
+ * SaaS Theme — final Desk header controls.
+ * Presentation only. Frappe owns search keyboard shortcuts, notifications,
+ * unread counts, user-menu dropdown, language chooser and profile binding.
+ * Search field moved to Sidebar on desktop; keep fallback on mobile.
+ */
+
+/* Desk page headers use Sidebar Search; Desktop Home keeps its real
+   Frappe search widget and must never be hidden by Desk-only rules. */
+@media (min-width: 768px) {
+	.page-head .st-page-utility-actions > .st-top-search,
+	.page-head .st-page-utility-actions > #small-search-button,
+	.page-head .standard-items-section > #small-search-button,
+	.page-head .search-widget-wrapper {
+		display: none !important;
+	}
+}
+
+/* Right-hand utilities retain original native buttons and menu bindings. */
+.page-head .st-page-utility-actions {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: 10px !important;
+	margin-inline-start: 8px !important;
+}
+.page-head .st-page-utility-actions .st-top-notification-host {
+	position: relative;
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+}
+.page-head .st-page-utility-actions .st-top-notification-button,
+.page-head .st-page-utility-actions button.desktop-notification-icon,
+.page-head .st-page-utility-actions .st-top-action:not(.st-top-search) {
+	position: relative !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 38px !important;
+	height: 38px !important;
+	min-width: 38px !important;
+	min-height: 38px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 1px solid var(--st-topbar-border, #dfe7f1) !important;
+	border-radius: 12px !important;
+	background: var(--st-topbar-surface, #fff) !important;
+	color: var(--st-topbar-text, #14213d) !important;
+	box-shadow: 0 2px 7px rgba(22, 53, 88, .04) !important;
+	transition: color .17s ease, background .17s ease, border-color .17s ease,
+		box-shadow .17s ease !important;
+}
+.page-head .st-page-utility-actions :is(
+	.st-top-notification-button, button.desktop-notification-icon,
+	.st-top-action:not(.st-top-search)
+):is(:hover, :focus-visible) {
+	background: var(--st-topbar-soft, #f2f7fd) !important;
+	border-color: #c1d4f2 !important;
+	color: var(--st-topbar-blue, #135ce1) !important;
+	box-shadow: 0 0 0 3px rgba(19, 92, 225, .08) !important;
+	outline: none !important;
+}
+.page-head .st-page-utility-actions :is(
+	.st-top-notification-button, button.desktop-notification-icon
+) :is(svg, .icon) {
+	width: 19px !important;
+	height: 19px !important;
+	stroke: currentColor !important;
+	color: currentColor !important;
+}
+.page-head .st-page-utility-actions .st-top-notification-host .notification-count,
+.page-head .st-page-utility-actions .st-top-notification-button .notification-count {
+	position: absolute !important;
+	inset-block-start: -5px !important;
+	inset-inline-end: -5px !important;
+	min-width: 17px !important;
+	height: 17px !important;
+	padding: 0 4px !important;
+	border: 2px solid var(--st-topbar-surface, #fff) !important;
+	border-radius: 999px !important;
+	background: #135ce1 !important;
+	color: #fff !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	line-height: 1 !important;
+}
+
+/* Profile: a soft surfaced circle with a real avatar, not a raw initials
+   label or decoration that could block the menu click. */
+.page-head .st-page-utility-actions .st-top-profile {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+.page-head .st-page-utility-actions .st-top-profile-button {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 40px !important;
+	height: 40px !important;
+	min-width: 40px !important;
+	min-height: 40px !important;
+	padding: 3px !important;
+	border: 1px solid var(--st-topbar-border, #dfe7f1) !important;
+	border-radius: 50% !important;
+	background: var(--st-topbar-surface, #fff) !important;
+	box-shadow: 0 2px 9px rgba(22, 53, 88, .055) !important;
+	transition: background .17s ease, border-color .17s ease, box-shadow .17s ease !important;
+}
+.page-head .st-page-utility-actions .st-top-profile-button:is(:hover, :focus-visible) {
+	border-color: #aec8ed !important;
+	background: var(--st-topbar-soft, #f2f7fd) !important;
+	box-shadow: 0 0 0 3px rgba(19, 92, 225, .08) !important;
+	outline: none !important;
+}
+.page-head .st-page-utility-actions .st-top-profile-button :is(
+	.avatar, .avatar-frame, img, .st-profile-fallback-avatar
+) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 50% !important;
+	object-fit: cover;
+}
+
+/* Desktop Home uses separate Frappe navbar markup and existing handlers. */
+.desktop-wrapper .desktop-navbar .desktop-notification-icon,
+.desktop-wrapper .desktop-navbar .desktop-cloud-settings {
+	border: 1px solid var(--st-topbar-border, #dfe7f1) !important;
+	border-radius: 12px !important;
+	background: var(--st-topbar-surface, #fff) !important;
+	box-shadow: 0 2px 7px rgba(22, 53, 88, .04) !important;
+}
+.desktop-wrapper .desktop-navbar .desktop-notification-icon:is(:hover, :focus-visible),
+.desktop-wrapper .desktop-navbar .desktop-cloud-settings:is(:hover, :focus-visible) {
+	border-color: #c1d4f2 !important;
+	color: var(--st-topbar-blue, #135ce1) !important;
+	box-shadow: 0 0 0 3px rgba(19, 92, 225, .08) !important;
+	outline: none !important;
+}
+.desktop-wrapper .desktop-navbar .desktop-avatar {
+	border-color: var(--st-topbar-border, #dfe7f1) !important;
+	padding: 3px !important;
+	background: var(--st-topbar-surface, #fff) !important;
+	box-shadow: 0 2px 9px rgba(22, 53, 88, .055) !important;
+	transition: border-color .17s ease, background .17s ease, box-shadow .17s ease !important;
+}
+.desktop-wrapper .desktop-navbar .desktop-avatar:is(:hover, :focus-visible) {
+	border-color: #aec8ed !important;
+	background: var(--st-topbar-soft, #f2f7fd) !important;
+	box-shadow: 0 0 0 3px rgba(19, 92, 225, .08) !important;
+	outline: none !important;
+}
+
+@media (max-width: 767px) {
+	.page-head .st-page-utility-actions {
+		gap: 6px !important;
+		margin-inline-start: 4px !important;
+	}
+	.page-head .st-page-utility-actions .st-top-profile-button {
+		width: 34px !important;
+		height: 34px !important;
+		min-width: 34px !important;
+		min-height: 34px !important;
+		padding: 2px !important;
+	}
+	.page-head .st-page-utility-actions .st-top-profile-button :is(.avatar, .avatar-frame, img) {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+	}
+}
+[data-theme="dark"] .page-head .st-page-utility-actions :is(
+	.st-top-notification-button, .st-top-profile-button
+) {
+	border-color: #33455d !important;
+	background: #182539 !important;
+	color: #e9f1fd !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	.page-head .st-page-utility-actions :is(button, .st-top-notification-button),
+	.desktop-wrapper .desktop-navbar :is(.desktop-avatar, .desktop-notification-icon) {
+		transition: none !important;
+	}
+}
+
+
+/* Global command input is now in the persistent Sidebar palette.
+   These selectors cover native Desktop / List / Form navbar variants,
+   but NEVER hide the AwesomeBar modal itself, which remains available
+   as a fallback on pages without a Sidebar and on mobile. */
+@media (min-width: 768px) {
+	.page-head :is(.navbar-search-bar, .search-widget-wrapper, .st-top-search),
+	.page-head .st-page-utility-actions #small-search-button {
+		display: none !important;
+	}
+}
+
+
+/* ---------------------------------------------------------------
+ * Frappe v16 exact Desk search controls + sticky header (v3).
+ *
+ * Verified from frappe/public/js/frappe/ui/page.html (small-search-button),
+ * frappe/ui/toolbar/awesome_bar.js (full-search-button, made visible
+ * again on page-change/form-refresh), and desktop/desktop.html
+ * (search-widget-wrapper). Do not target #navbar-search: that input
+ * belongs to Frappe's independently usable modal fallback.
+ * --------------------------------------------------------------- */
+@media (min-width: 768px) {
+	body #full-search-button,
+	body .page-head #full-search-button,
+	body .page-head #small-search-button,
+	body .page-head .navbar-search-bar,
+	body .page-head .standard-items-section .search-bar,
+	body .page-head .st-header-search-shell,
+	body .page-head .st-header-search-slot {
+		display: none !important;
+		visibility: hidden !important;
+	}
+}
+
+/* Keep the page's genuine Frappe v16 .page-head above scrolling Forms,
+   Lists, Reports and Workspace content. No fixed-position gap, no sticky
+   override on print previews or the original SearchDialog. */
+@media screen and (min-width: 768px) {
+	body .page-container > .page-head {
+		position: sticky !important;
+		top: 0 !important;
+		z-index: 1100 !important;
+		background: #fff !important;
+		border-bottom: 1px solid var(--border-color, #e1e7ee) !important;
+		box-shadow: 0 2px 10px rgba(25, 49, 83, .045) !important;
+	}
+	body .desktop-wrapper .desktop-navbar {
+		position: sticky !important;
+		top: 0 !important;
+		z-index: 1100 !important;
+		background: #fff !important;
+	}
+}
+@media (max-width: 767px) {
+	/* Frappe owns the responsive page controls and mobile Search entry. */
+	body .page-container > .page-head {
+		position: sticky !important;
+		top: 0 !important;
+		z-index: 1100 !important;
+		background: #fff !important;
+	}
+}
+@media print {
+	body .page-container > .page-head {
+		position: static !important;
+		box-shadow: none !important;
+	}
+}
+
+
+/* ---------------------------------------------------------------
+ * v4 – keep a completely solid white sticky Desk navbar, including
+ * Accounts Dashboard. Never force the Home search invisible.
+ * --------------------------------------------------------------- */
+@media screen {
+	body .page-head {
+		position: sticky !important;
+		top: 0 !important;
+		z-index: 1100 !important;
+		background: #fff !important;
+		background-color: #fff !important;
+		background-image: none !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+	body .page-head > .container,
+	body .page-head .page-head-content {
+		background: transparent !important;
+		background-image: none !important;
+	}
+	body .desktop-wrapper .desktop-navbar {
+		background: #fff !important;
+		background-color: #fff !important;
+		background-image: none !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+}
+@media screen and (min-width: 768px) {
+	/* Undo previous global suppressors. This is intentionally Home-only:
+	   form/list/dashboard page headers never use these native Home nodes. */
+	body .desktop-wrapper .desktop-navbar .search-widget-wrapper,
+	body .desktop-wrapper .desktop-navbar .st-home-search-relocated {
+		display: flex !important;
+		visibility: visible !important;
+	}
+	body .desktop-wrapper .desktop-navbar .search-widget-button {
+		display: flex !important;
+		visibility: visible !important;
+	}
+	/* Frappe and extensions can create an additional centered Desk
+	   command-search field at runtime. The final JS owner marks that
+	   exact header control, without touching document filters or Home. */
+	body .page-head .st-desk-command-search-hidden {
+		display: none !important;
+		visibility: hidden !important;
+	}
+}
+[data-theme="dark"] body .page-head,
+[data-theme="dark"] body .desktop-wrapper .desktop-navbar {
+	background: var(--st-topbar-bg, #141e2c) !important;
+	background-color: var(--st-topbar-bg, #141e2c) !important;
+}
+@media print {
+	body .page-head {
+		position: static !important;
+		box-shadow: none !important;
+	}
+}
