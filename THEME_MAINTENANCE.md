@@ -1348,3 +1348,72 @@ Note: the exact-content protected `popup_controls.css?v=1` was restored unchange
   direct keyboard text entry. Actual ERPNext browser verification remains
   necessary for Pashto/Dari Journal Entry/Payment Entry/Sales Invoice rows,
   negative values, compact columns, focus/blur, and dark mode.
+
+### Production ERP login / default Company branding (2026-11-24)
+
+The public login page is now an enterprise two-panel **production management**
+experience (neutral industrial illustration, decorative analytics card, soft
+geometric backdrop, compact form, responsive footer). It is deliberately **not**
+branded for any one organization or specific industry. No mock dashboard
+values represent live production KPIs.
+
+- `www/login.py` reads the already-existing guest-safe
+  `saas_theme.branding.get_company_branding` (ERPNext Global Defaults default
+  Company / Company.company_logo) **on the initial HTML response**, and makes
+  `company_name`, `company_logo`, `company_initial`,
+  `logo_fallback` and `copyright_year` available to the Jinja template.
+  If Company settings are unavailable, the configured app name or generic
+  "Production System" is used. Private File URLs are not publicly served:
+  the site Navbar logo or company monogram is displayed instead. To display
+  a Company logo to Guests, store it in a **public** File.
+- `www/login.html` retains Frappe v16 login.js, form selectors,
+  LDAP/social/third-party login options, signup-disabled and email-link states,
+  password-reset and redirect behavior. Removed an invalid nested form inside
+  the social-sign-in branch. The organization name/logo are inserted into
+  every auth state and the footer using server-rendered values.
+- `public/css/login_production.css?v=1` is intentionally scoped to the
+  `st-login-site` and login-route selectors. Existing Desk, Grid, Report,
+  Dialog, and ERPNext screens are not affected. The layout changes from
+  two full-width columns to a centered card, collapses the illustrative
+  panel on tablets/mobile, and supports keyboard focus and reduced motion.
+  Charts/industrial SVG are presentational only.
+- `public/js/login_fix.js?v=3` retains the existing sign-in transition,
+  auth-error handler and navigation logic; it now reveals logos only after
+  successful loading, attempts a public Navbar logo fallback, and keeps a
+  legible company monogram if both images fail. Late branding updates no
+  longer overwrite the titles of Forgot Password, Signup, etc.
+- `scripts/test_production_login_branding.py` guards default Company
+  branding, absence of hardcoded company names, accessible logo fallback,
+  native Frappe selectors/auth paths, and responsive CSS; CI runs it with
+  `node --check` and Python syntax validation.
+
+After deploying the PR, clear site cache and verify the logo from **ERPNext
+Company > Company Logo** (public file), **Global Defaults > Default Company**,
+login/error/forgot/signup/SSO, narrow mobile view, keyboard focus,
+English/Pashto/Dari, and light/dark browsers. Asset URLs are versioned,
+and login CSS/JS are not injected into authenticated Desk routes.
+
+### Purchase Invoice Supplier autocomplete above Items grid (17 November 2026)
+
+A screenshot of an open Supplier Link menu showed the native Items table
+checkbox and row index painted through the third supplier suggestion. Frappe
+v16's sticky child grid reserves positive local stacking indices, while the
+earlier active-form-card promotion addressed only direct child `.form-section`
+cards. On tabbed layouts the standard form section lives **inside**
+`.form-tab-content`, so it was not consistently promoted above sticky
+grid cells.
+
+`form_autocomplete_layer.css?v=2` raises the active normal Form Link or
+Dynamic Link's **tab, section, and form-column** only while the field is
+focused or its native suggestion list is open. It also isolates inactive
+child-table grids into a lower stacking context while that menu is active.
+The list remains an opaque scrolling surface. Selectors use
+`.form-column > .frappe-control` to exclude inline child-grid controls;
+grid checkbox events, sticky anchors, row selection, keyboard navigation,
+scrolling, hidden menus, dialogs, mobile layouts, and RTL are untouched.
+
+A source-level regression guard in `test_form_autocomplete_rtl.py` verifies
+the scoped active state, the tabbed Form path, the grid containment and
+the original menu visibility behavior. Live ERPNext verification is still
+required for Supplier on Purchase Invoice, English/RTL, light/dark, narrow
+screens, and normal/empty suggestion lists.
