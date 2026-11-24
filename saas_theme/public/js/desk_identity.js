@@ -238,6 +238,11 @@
 
 	function start() {
 		startHeadObserver();
+		// Replace Frappe's startup favicon immediately, before the optional
+		// company-branding request finishes. A valid public logo wins later.
+		setFavicon(monogramFavicon(
+			frappe.boot?.sysdefaults?.company || frappe.boot?.app_name || "Production"
+		));
 		loadBranding();
 		syncSidebarIcon();
 
