@@ -1,0 +1,104 @@
+/*
+ * Expanded GridRowForm in the native browser top layer.
+ *
+ * Frappe v16 keeps .form-in-grid INSIDE its owning .grid-row. Do not
+ * reparent the editor or its Item Link: that breaks focus and DOM
+ * ancestry. CSS popover layering escapes parent overflow and #freeze.
+ * Other forms, inline child cells and regular dialogs are unchanged.
+ */
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open {
+	box-sizing: border-box !important;
+	position: fixed !important;
+	top: 14px !important;
+	right: auto !important;
+	bottom: 14px !important;
+	left: 50% !important;
+	inset-inline: auto !important;
+	width: min(1240px, calc(100vw - 32px)) !important;
+	max-width: calc(100vw - 32px) !important;
+	max-height: calc(100dvh - 28px) !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	transform: translateX(-50%) !important;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
+	border-radius: 16px !important;
+	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+	box-shadow: var(--st-v7-editor-shadow, 0 22px 56px rgba(15, 23, 42, .20)) !important;
+	overscroll-behavior: contain !important;
+	z-index: 12010 !important;
+}
+
+/* Scroll the sheet itself, not an inner clipped container: a native Link
+ * popup has room to render; the Awesomplete list uses a second top-layer
+ * popover to remain visible regardless of the Item field's position. */
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .grid-form-body {
+	box-sizing: border-box !important;
+	height: auto !important;
+	max-height: none !important;
+	overflow: visible !important;
+	padding: 16px !important;
+	background: var(--st-v7-surface-soft, #f8fafc) !important;
+}
+
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .form-section,
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .section-body {
+	overflow: visible !important;
+}
+
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open > .grid-form-heading {
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 5 !important;
+}
+
+/* Native UL stays BELOW the editor in DOM but ABOVE it in the browser
+ * top-layer ordering; no cloning or event rebinding. */
+body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open,
+body .grid-row.grid-row-open .form-in-grid .awesomplete > [role="listbox"].st-overlay-link-suggestions:popover-open {
+	box-sizing: border-box !important;
+	position: fixed !important;
+	display: block !important;
+	margin: 0 !important;
+	padding: 6px !important;
+	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
+	border-radius: 11px !important;
+	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+	box-shadow: var(--st-v7-popup-shadow, 0 12px 30px rgba(15, 23, 42, .17)) !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	pointer-events: auto !important;
+	overscroll-behavior: contain !important;
+}
+
+body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li,
+body .grid-row.grid-row-open .form-in-grid .awesomplete > [role="listbox"].st-overlay-link-suggestions:popover-open > li {
+	display: block !important;
+	min-height: 34px !important;
+	padding: 8px 10px !important;
+	margin: 0 0 2px !important;
+	border-radius: 7px !important;
+	background: transparent !important;
+	color: inherit !important;
+	cursor: pointer !important;
+}
+
+body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li:hover,
+body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li[aria-selected="true"] {
+	background: var(--st-v7-selected, #eef4ff) !important;
+}
+
+@media (max-width: 767px) {
+	body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open {
+		width: calc(100vw - 16px) !important;
+		max-width: calc(100vw - 16px) !important;
+		top: 8px !important;
+		bottom: 8px !important;
+		max-height: calc(100dvh - 16px) !important;
+		border-radius: 12px !important;
+	}
+}
