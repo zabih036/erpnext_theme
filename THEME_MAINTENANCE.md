@@ -1493,3 +1493,35 @@ The CI suite also checks the architecture and unrelated theme behaviors.
 After deploy, verify Currency Exchange modal's Currency Link, Purchase
 Invoice Item child editor, keyboard navigation, mouse selection, scrolling,
 compact screens, Pashto/Dari and dark theme on the real Frappe site.
+
+### Purchase Invoice Item Link in expanded child-row editor (25 Nov 2026)
+
+Follow-up to merged PR #4: the modal/sheet list portal worked in a mock
+case where the editor was already directly under `body`, but the **Item**
+input was still unusable during the actual Frappe GridRowForm opening
+sequence. `GridRow.show_form()` creates the editor under the existing
+grid row and Frappe focuses its first input. The theme's v7 controller
+then reparents the *same* `.form-in-grid` to `body`. While that
+transition is underway the input can simultaneously match
+`.form-grid .editable-row` and `.form-in-grid`. The previous
+`eligibleInput()` unconditionally excluded any
+`.form-grid .editable-row` descendant, so it skipped the legitimate
+expanded Item Link and never moved its native options above the clipped
+editor.
+
+`overlay_link_suggestions.js?v=2` now prioritizes an actual
+`.form-in-grid` ancestor over the inline grid-cell exclusion, retries
+detection when the row editor moves under `body` and Frappe's async
+results arrive, and preserves input focus while a temporarily portaled
+option is clicked. The existing v7 *inline cell* portal stays the sole
+owner of ordinary editable grid fields; normal form fields, dialogs,
+company branding and unrelated overlays are untouched. The test fixture
+now covers an Item field in the pre-portal nested row and the true
+inline-grid exclusion independently, as well as mouse option focus
+and native same-node restoration. A new JS version busts cached Desk
+assets.
+
+Live acceptance: in Purchase Invoice, open an Items row's **Edit**
+view, click or type in **Item**, select a suggestion, confirm the
+selected Item persists after closing/reopening the row, and repeat
+with keyboard, RTL and narrow screens.
