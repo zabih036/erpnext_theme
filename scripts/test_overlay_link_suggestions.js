@@ -177,6 +177,21 @@ async function run(){
 	assert.equal(gridField.ul.parentNode,body,"expanded row UL escapes clipped grid body");
 	assert.equal(gridField.ul.style.values["z-index"][0],"15020","grid UL is below real dialogs");
 	assert.equal(win.saas_theme.overlay_link_diagnostics().surfaces[0],"grid-editor");
+	// Item suggestions can arrive while the editor is still being opened.
+	// They must migrate from body z-index to their ORIGINAL wrapper when
+	// the editor enters its own top layer, without losing option handlers.
+	editor.popoverOpen=true;
+	doc.activeElement=gridField.input;
+	signal("focusin",gridField.input);
+	flush();
+	assert.equal(gridField.ul.parentNode,gridField.wrapper,
+		"pending Link list upgrades from body to native nested popover");
+	assert.equal(gridField.ul.matches(":popover-open"),true);
+	editor.popoverOpen=false;
+	signal("focusin",gridField.input);
+	flush();
+	assert.equal(gridField.ul.parentNode,body,
+		"legacy overlay path remains available for non-popover dialogs");
 	gridField.ul.attrs.hidden="";
 	flush();
 	signal("awesomplete-close",gridField.input);
