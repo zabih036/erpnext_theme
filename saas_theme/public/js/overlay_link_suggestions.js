@@ -156,9 +156,17 @@
 		if (!list || !open(list)) return;
 		const surface = surfaceFor(input);
 		if (!surface) return;
+		const topLayer = !surface.dialog &&
+			surface.element.matches(":popover-open") &&
+			typeof list.showPopover === "function" &&
+			typeof list.hidePopover === "function";
 		const known = portals.get(list);
 		if (known) {
-			if (known.input !== input || known.surface.element !== surface.element) {
+			if (known.input !== input || known.surface.element !== surface.element ||
+				known.topLayer !== topLayer) {
+				// An async Link lookup may open just before GridRowForm enters
+				// the browser top layer. Upgrade that existing body popup
+				// to a nested top-layer UL rather than leaving it behind.
 				restore(list);
 			} else {
 				position(list, known);
@@ -168,10 +176,6 @@
 		if (!list.parentNode) return;
 		const parent = list.parentNode;
 		const style = list.getAttribute("style");
-		const topLayer = !surface.dialog &&
-			surface.element.matches(":popover-open") &&
-			typeof list.showPopover === "function" &&
-			typeof list.hidePopover === "function";
 		const previousPopover = topLayer ? list.getAttribute("popover") : null;
 		const meta = { input, surface, parent, style, topLayer: false, marker: null };
 		list.classList.add(PORTAL_CLASS);
