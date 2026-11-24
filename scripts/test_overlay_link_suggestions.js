@@ -53,6 +53,7 @@ class FakeNode {
 	hasAttribute(k){return Object.hasOwn(this.attrs,k);}
 	matches(selector){return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));}
 	getBoundingClientRect(){return this.rect;}
+	closest(selector){return this.nodeName==="UL" && selector.includes(".awesomplete") ? this.parentNode : null;}
 	contains(node){return this.children.includes(node);}
 	querySelector(){return null;}
 	get firstElementChild(){return this.children[0] || null;}
