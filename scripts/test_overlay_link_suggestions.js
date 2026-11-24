@@ -53,6 +53,7 @@ class FakeNode {
 	hasAttribute(k){return Object.hasOwn(this.attrs,k);}
 	matches(selector){return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));}
 	getBoundingClientRect(){return this.rect;}
+	contains(node){return this.children.includes(node);}
 	querySelector(){return null;}
 	get firstElementChild(){return this.children[0] || null;}
 }
@@ -146,7 +147,7 @@ async function run(){
 	assert.equal(dialogField.ul.parentNode,dialogField.wrapper,"modal UL restored");
 	assert.equal(dialogField.wrapper.children[0],original,"same UL (not cloned)");
 	assert.equal(win.saas_theme.overlay_link_diagnostics().open_portals,0);
-	assert.deepEqual(dialogField.ul.style.values,{"position":["fixed","important"],"top":[dialogField.ul.style.values.top[0],"important"],"left":[dialogField.ul.style.values.left[0],"important"],"right":["auto","important"],"bottom":["auto","important"],"width":["250px","important"],"min-width":["250px","important"],"max-width":["250px","important"],"max-height":["300px","important"],"z-index":["20010","important"],"transform":["none","important"],"translate":["none","important"]}, "style only modified through dedicated properties (restored attribute separately)");
+	assert.equal(dialogField.ul.getAttribute("style"),null,"temporary popup positioning must not persist after close");
 	await opened(gridField);
 	assert.equal(gridField.ul.parentNode,body,"expanded row UL escapes clipped grid body");
 	assert.equal(gridField.ul.style.values["z-index"][0],"15020","grid UL is below real dialogs");
