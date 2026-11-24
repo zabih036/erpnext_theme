@@ -63,6 +63,7 @@ EXPECTED_DESK_JS = [
     "/assets/saas_theme/js/home_dashboard.js?v=4",
     "/assets/saas_theme/js/home_analytics.js?v=13",
     "/assets/saas_theme/js/brand_shell.js?v=5",
+    "/assets/saas_theme/js/desk_identity.js?v=1",
     "/assets/saas_theme/js/ui_finish.js?v=1",
     "/assets/saas_theme/js/route_loader.js?v=1",
     "/assets/saas_theme/js/mobile_shell.js?v=3",
@@ -77,7 +78,6 @@ EXPECTED_DESK_JS = [
     "/assets/saas_theme/js/native_dashboard_view.js?v=4",
     "/assets/saas_theme/js/workspace_sidebar_design.js?v=5",
     "/assets/saas_theme/js/desk_header_search.js?v=1",
-	"/assets/saas_theme/js/desk_identity.js?v=1",
 ]
 
 EXPECTED_WEB_CSS = "/assets/saas_theme/css/login_refinement.css?v=3"
