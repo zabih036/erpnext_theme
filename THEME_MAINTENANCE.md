@@ -1560,3 +1560,45 @@ Manual browser verification of the blur behavior was performed in
 headless Chromium. Final on-site validation must test Purchase Invoice
 → Items → Edit → Item, including picking an item, keyboard selection,
 and returning to the child table; CI does not connect to ERPNext.
+
+### Expanded child editor: preserve Frappe's original DOM (25 November 2026)
+
+After PRs #4–#6, Purchase Invoice's **Item** Link was still inaccessible
+from the pencil/Edit row view. The central conflict was not a missing
+global z-index or an ERPNext Theme Settings value. Our theme's
+`interaction_finish_v2.js` **reparented the entire Frappe GridRowForm
+from its owning .grid-row into document.body**. That destroys the original
+DOM ancestry and can blur a focused Link field; Frappe v16.17.0 checks
+whether the field remains focused before applying async search results.
+Earlier attempts only repositioned the dropdown (or restored focus after
+detachment) and did not preserve the original Frappe control lifecycle.
+
+**Solution:** On browsers supporting the standard Popover API, the
+expanded `.form-in-grid` is promoted into the *browser's top layer*
+using `popover=manual` and `showPopover()` while remaining inside its
+original grid row. The native Awesomplete suggestion `<ul>` is promoted
+to a *second* top-layer popover above the editor **without moving it
+out of its original wrapper**. Original Frappe input focus, parent
+context, search callbacks, selection handlers, DOM data, and keyboard
+behavior are unchanged. `hidePopover()`/restore on row closure
+preserve native teardown. Advanced Search modal dialogs temporarily
+suppress the editor popover and restore it on close so those dialogs
+stay clickable. For browsers lacking Popover API, the legacy body
+portal remains a guarded compatibility fallback.
+
+`grid_editor_popover.css?v=1` controls only the two top-layer
+surfaces; native grid cells, normal Form links, Quick Entry dialogs,
+accounts and business logic are untouched. The existing protected
+CSS asset sequence was not reordered. Asset versions:
+`interaction_finish_v2.js?v=12` and
+`overlay_link_suggestions.js?v=3`.
+
+Verification: a real headless Chromium DOM test established that a
+nested manual popover editor and its original UL can both appear above
+a higher-z-index backdrop while staying in their original DOM parents,
+and clicking a suggestion updates the input. CI tests exercise
+editor opening, modal override, reopening, native-list top-layer
+selection, and fallback/teardown. Production ERPNext browser
+verification is still required for Purchase Invoice > Items > Edit >
+Item with click, keyboard, and mouse, and for other expanded child rows.
+
