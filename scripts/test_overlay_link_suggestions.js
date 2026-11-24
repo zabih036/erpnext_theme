@@ -51,7 +51,12 @@ class FakeNode {
 	getAttribute(k){return Object.hasOwn(this.attrs,k)?this.attrs[k]:null;}
 	removeAttribute(k){delete this.attrs[k];}
 	hasAttribute(k){return Object.hasOwn(this.attrs,k);}
-	matches(selector){return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));}
+	matches(selector){
+		if (selector === ":popover-open") return !!this.popoverOpen;
+		return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));
+	}
+	showPopover(){this.popoverOpen=true;}
+	hidePopover(){this.popoverOpen=false;}
 	getBoundingClientRect(){return this.rect;}
 	closest(selector){return this.nodeName==="UL" && selector.includes(".awesomplete") ? this.parentNode : null;}
 	contains(node){return this.children.includes(node);}
@@ -176,6 +181,23 @@ async function run(){
 	flush();
 	signal("awesomplete-close",gridField.input);
 	assert.equal(gridField.ul.parentNode,gridField.wrapper,"hidden grid suggestions return to field");
+	// A native popover GridRowForm must keep its Awesomplete UL INSIDE
+	// its original wrapper; a second top-layer popover gives options
+	// visual priority without detaching native Frappe click handlers.
+	editor.popoverOpen=true;
+	await opened(gridField);
+	assert.equal(gridField.ul.parentNode,gridField.wrapper,
+		"native editor's Link list must not be moved to body");
+	assert.equal(gridField.ul.matches(":popover-open"),true,
+		"Item options must open in a second native top layer");
+	assert.equal(gridField.ul.getAttribute("popover"),"manual");
+	gridField.ul.attrs.hidden="";
+	signal("awesomplete-close",gridField.input);
+	assert.equal(gridField.ul.parentNode,gridField.wrapper);
+	assert.equal(gridField.ul.matches(":popover-open"),false);
+	assert.equal(gridField.ul.getAttribute("popover"),null,
+		"restoring suggestions must not leave stale popover attributes");
+	editor.popoverOpen=false;
 	// The Purchase Invoice Item field can open before Frappe has finished
 	// moving the GridRowForm from an editable table row to <body>. It is
 	// an expanded child editor despite having an .editable-row ancestor.
