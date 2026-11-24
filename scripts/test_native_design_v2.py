@@ -124,11 +124,8 @@ def main() -> None:
         ASSET_ROOT + "js/workspace_sidebar_design.js?v=5",
     ]
     assert css[-9:-6] == expected_css, "Native design rules must remain ahead of final header polish"
-    assert js[-4:-2] == expected_js, "Native controllers remain ahead of Desk header search owner"
-    assert js[-2] == ASSET_ROOT + "js/desk_header_search.js?v=1"
-    assert js[-1] == ASSET_ROOT + "js/desk_identity.js?v=1", (
-        "Desk identity follows native Dashboard/Workspace and Desk search controllers"
-    )
+    assert js[-3:-1] == expected_js, "Native controllers remain ahead of Desk header search owner"
+    assert js[-1] == ASSET_ROOT + "js/desk_header_search.js?v=1"
     assert all(css.count(path) == 1 for path in expected_css)
     assert all(js.count(path) == 1 for path in expected_js)
     assert css.index(ASSET_ROOT + "css/workspace_dashboard.css?v=1") < len(css) - 2
