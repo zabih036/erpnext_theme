@@ -1,0 +1,52 @@
+/*
+ * Desk branding: align the active Sidebar header icon with the selected
+ * workspace rail icon. No changes to sidebar navigation, click targets,
+ * collapsed widths, Grid or Page controls.
+ */
+.body-sidebar .sidebar-header.st-sidebar-selected-icon .header-logo {
+	box-sizing: border-box;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	min-height: 36px;
+	overflow: hidden;
+	border-radius: 10px;
+}
+
+.body-sidebar .sidebar-header.st-sidebar-selected-icon .header-logo :is(svg, .icon) {
+	display: block;
+	width: 20px;
+	height: 20px;
+	max-width: 100%;
+	max-height: 100%;
+	flex: 0 0 auto;
+}
+
+/* Matches the existing workspace rail's first-letter fallback when a
+   custom Sidebar does not define header_icon. */
+.body-sidebar .sidebar-header.st-sidebar-selected-icon .st-sidebar-workspace-initial {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: 1px solid var(--border-color, #d6e3eb);
+	border-radius: 10px;
+	background: var(--subtle-fg, #eff5f9);
+	color: var(--text-color, #18334a);
+	font-size: 15px;
+	font-weight: 750;
+	line-height: 1;
+}
+
+@media (max-width: 767px) {
+	.body-sidebar .sidebar-header.st-sidebar-selected-icon .header-logo {
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		min-height: 32px;
+	}
+}
