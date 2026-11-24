@@ -43,21 +43,34 @@
 	function eligibleInput(input) {
 		if (!(input instanceof HTMLInputElement) || !input.isConnected) return false;
 		if (!input.closest(FIELD_SELECTOR)) return false;
-		// The existing v7 controller handles inline editable-row Link cells.
-		if (input.closest(".form-grid .editable-row")) return false;
-		return !!surfaceFor(input);
+		// An expanded GridRowForm can still be nested beneath .editable-row
+		// during the first Frappe paint, before interaction_finish_v2 portals
+		// its editor to <body>. Do not reject its Item Link as an inline cell.
+		const surface = surfaceFor(input);
+		if (!surface) return false;
+		// Only truly inline grid cells belong to the existing v7 popup owner.
+		if (input.closest(".form-grid .editable-row") && !input.closest(".form-in-grid")) {
+			return false;
+		}
+		return true;
 	}
 
 	function ownList(input) {
 		const wrapper = input.closest(".awesomplete");
-		if (!wrapper) return null;
 		const controlled = input.getAttribute("aria-controls");
 		const list = controlled && document.getElementById(controlled);
 		if (list?.matches?.("ul, [role='listbox']") &&
-			(wrapper.contains(list) || portals.get(list)?.input === input)) return list;
-		return Array.from(wrapper.children).find(node =>
-			node.matches?.("ul, [role='listbox']")
-		) || null;
+			(wrapper?.contains(list) || portals.get(list)?.input === input)) return list;
+		// Frappe creates Awesomplete while the GridRowForm is rendered. A
+		// list can be a direct child of its wrapper, or a sibling placed in
+		// the field's control-input area during the first focus cycle.
+		const candidates = [
+			...(wrapper ? Array.from(wrapper.children) : []),
+			...Array.from(input.closest(".link-field, .control-input")?.querySelectorAll(
+				".awesomplete > ul, .awesomplete > [role='listbox']"
+			) || []),
+		];
+		return candidates.find(node => node.matches?.("ul, [role='listbox']")) || null;
 	}
 
 	function open(list) {
@@ -171,6 +184,20 @@
 		}
 		const focused = document.activeElement;
 		if (eligibleInput(focused)) portal(focused);
+
+		// Frappe's search_link callback can open Awesomplete AFTER the
+		// focus/open event and AFTER v7 reparents the GridRowForm. Search
+		// only the two affected overlay surfaces for *visible native lists*,
+		// rather than depending on the order of those asynchronous events.
+		// No normal Form or inline grid Link is considered here.
+		for (const surface of document.querySelectorAll(
+			".modal.show, body > .form-in-grid.st-v7-grid-editor, " +
+			"body > .form-in-grid.st-grid-row-portal, .grid-row-open .form-in-grid"
+		)) {
+			for (const input of surface.querySelectorAll(".awesomplete > input")) {
+				if (eligibleInput(input)) portal(input);
+			}
+		}
 	}
 
 	function schedule() {
@@ -215,6 +242,16 @@
 		if (event.key === "Escape") schedule();
 	}, true);
 
+	// On a portaled list the input is in the editor but the option is
+	// under body. Keep the input focused through pointer selection so
+	// Frappe's async search callback and native Awesomplete click handler
+	// can complete. Do not stop propagation or replace selection events.
+	document.addEventListener("mousedown", event => {
+		if (event.target?.closest?.("body > ." + PORTAL_CLASS)) {
+			event.preventDefault();
+		}
+	}, true);
+
 	// Native open/close can change [hidden] asynchronously; also restores
 	// lists when a modal or editor is destroyed without a close event.
 	function observe() {
@@ -236,8 +273,8 @@
 				}
 				return Array.from(record.addedNodes || []).some(node =>
 					node.nodeType === 1 && (
-						node.matches?.(".awesomplete, .modal.show, .form-in-grid") ||
-						node.querySelector?.(".awesomplete")
+						node.matches?.(".awesomplete, .modal.show, .form-in-grid, ul[role='listbox']") ||
+						node.querySelector?.(".awesomplete, ul[role='listbox']")
 					)
 				);
 			})) schedule();

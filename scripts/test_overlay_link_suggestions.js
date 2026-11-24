@@ -53,6 +53,7 @@ class FakeNode {
 	hasAttribute(k){return Object.hasOwn(this.attrs,k);}
 	matches(selector){return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));}
 	getBoundingClientRect(){return this.rect;}
+	closest(selector){return this.nodeName==="UL" && selector.includes(".awesomplete") ? this.parentNode : null;}
 	contains(node){return this.children.includes(node);}
 	querySelector(){return null;}
 	get firstElementChild(){return this.children[0] || null;}
@@ -87,6 +88,8 @@ function setupField(surface,type="Link",inline=false){
 	input.control=control;input.wrapper=wrapper;
 	const ul=new FakeNode("UL");
 	ul.attrs.id="list-"+type+"-"+surface.nodeName;
+	// Native Awesomplete begins hidden and reveals the same UL on results.
+	ul.attrs.hidden="";
 	input.attrs["aria-controls"]=ul.attrs.id;
 	input.awesomplete=ul;
 	wrapper.appendChild(ul);control.appendChild(wrapper);
@@ -95,25 +98,38 @@ function setupField(surface,type="Link",inline=false){
 }
 const dialogField=setupField(modal);
 const gridField=setupField(editor,"Dynamic Link");
-const inlineField=setupField(editor,"Link",true);
+const nestedExpandedItemField=setupField(editor,"Link",true);
+// A true inline cell is outside .form-in-grid and must remain owned by v7.
+const inlineField=setupField(new FakeNode("GRID"),"Link",true);
 const outside=new HTMLInputElementMock(new FakeNode("NORMAL"),"Link");
 
-const all=[dialogField,gridField,inlineField];
+const all=[dialogField,gridField,nestedExpandedItemField,inlineField];
+modal.querySelectorAll=()=>[dialogField.input];
+editor.querySelectorAll=()=>[gridField.input,nestedExpandedItemField.input];
 const doc={
 	body,readyState:"loading",
 	documentElement:{clientWidth:900,clientHeight:750},
 	activeElement:null,
 	addEventListener(name,listener){events.set(name,listener);},
 	getElementById(id){return all.find(f=>f.ul.attrs.id===id)?.ul || null;},
+	querySelectorAll(selector) {
+		assert.ok(selector.includes(".form-in-grid") && selector.includes(".modal.show"));
+		return [modal,editor];
+	},
 	createComment(){return new FakeNode("#comment");},
 };
 const $=()=>({on(){}});
+let mutationObserver;
 const win={
-	innerWidth:900,innerHeight:750,MutationObserver:class{constructor(cb){this.cb=cb;}observe(){}},
+	innerWidth:900,innerHeight:750,MutationObserver:class{
+		constructor(cb){this.cb=cb;mutationObserver=this;}
+		observe(){}
+	},
 	getComputedStyle(node){return {display:node.hasAttribute("hidden")?"none":"block",visibility:"visible",zIndex:node===modal?"20000":node===editor?"12010":"auto"};},
 	addEventListener(name,listener){events.set("window:"+name,listener);},
 };
 const windowContext={window:win,document:doc,Element:FakeNode,HTMLInputElement:HTMLInputElementMock,
+	MutationObserver:win.MutationObserver,
 	requestAnimationFrame(fn){queue.push(fn);return queue.length;},
 	setTimeout(fn){timeout.push(fn);},queueMicrotask(fn){Promise.resolve().then(fn);},
 	console};
@@ -127,6 +143,7 @@ function flush(){
 function signal(name,target){events.get(name)({target});}
 async function opened(f){
 	doc.activeElement=f.input;
+	delete f.ul.attrs.hidden;
 	signal("awesomplete-open",f.input);
 	await Promise.resolve();
 	flush();
@@ -135,6 +152,8 @@ async function run(){
 	assert.ok(events.has("awesomplete-close"),"close listener registered");
 	assert.ok(events.has("focusin"),"focus listener registered");
 	assert.ok(events.has("input"),"input listener registered");
+	events.get("DOMContentLoaded")();
+	assert.ok(mutationObserver,"native list visibility observer started");
 	await opened(dialogField);
 	assert.equal(dialogField.ul.parentNode,body,"modal UL is body portaled");
 	assert.equal(dialogField.ul.style.values["z-index"][0],"20010","popup is above the actual modal");
@@ -143,6 +162,7 @@ async function run(){
 	assert.equal(dialogField.ul.style.values["max-height"][0],"300px");
 	assert.equal(win.saas_theme.overlay_link_diagnostics().open_portals,1);
 	const original=dialogField.ul;
+	dialogField.ul.attrs.hidden="";
 	signal("awesomplete-close",dialogField.input);
 	assert.equal(dialogField.ul.parentNode,dialogField.wrapper,"modal UL restored");
 	assert.equal(dialogField.wrapper.children[0],original,"same UL (not cloned)");
@@ -156,6 +176,37 @@ async function run(){
 	flush();
 	signal("awesomplete-close",gridField.input);
 	assert.equal(gridField.ul.parentNode,gridField.wrapper,"hidden grid suggestions return to field");
+	// The Purchase Invoice Item field can open before Frappe has finished
+	// moving the GridRowForm from an editable table row to <body>. It is
+	// an expanded child editor despite having an .editable-row ancestor.
+	await opened(nestedExpandedItemField);
+	assert.equal(nestedExpandedItemField.ul.parentNode,body,
+		"Item Link suggestions must be portaled even in the editor's initial nested state");
+	const pointer={target:{closest:(selector)=>selector.includes("st-overlay-link-suggestions")?nestedExpandedItemField.ul:null},
+		preventDefault(){this.prevented=true;},prevented:false};
+	events.get("mousedown")(pointer);
+	assert.equal(pointer.prevented,true,"Option press keeps Item input focused");
+	assert.equal(doc.activeElement,nestedExpandedItemField.input);
+	nestedExpandedItemField.ul.attrs.hidden="";
+	signal("awesomplete-close",nestedExpandedItemField.input);
+	assert.equal(nestedExpandedItemField.ul.parentNode,nestedExpandedItemField.wrapper);
+	// The user can type into Item before the async search_link list opens.
+	// The native [hidden] mutation must discover that UL even without
+	// a second focus event or a separate awesomplete-open callback.
+	doc.activeElement=nestedExpandedItemField.input;
+	signal("focusin",nestedExpandedItemField.input);
+	flush();
+	assert.equal(nestedExpandedItemField.ul.parentNode,nestedExpandedItemField.wrapper);
+	delete nestedExpandedItemField.ul.attrs.hidden;
+	mutationObserver.cb([{
+		type:"attributes",target:nestedExpandedItemField.ul,attributeName:"hidden",
+	}]);
+	flush();
+	assert.equal(nestedExpandedItemField.ul.parentNode,body,
+		"late search_link results must display above expanded Item editor");
+	nestedExpandedItemField.ul.attrs.hidden="";
+	signal("awesomplete-close",nestedExpandedItemField.input);
+	assert.equal(nestedExpandedItemField.ul.parentNode,nestedExpandedItemField.wrapper);
 	doc.activeElement=inlineField.input;
 	signal("awesomplete-open",inlineField.input);
 	await Promise.resolve();flush();
