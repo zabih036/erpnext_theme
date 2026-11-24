@@ -91,10 +91,11 @@ def main() -> None:
         P + "css/workspace_sidebar_design.css?v=4",
         P + "css/desk_header_finish.css?v=4",
     ]
-    assert vals["app_include_js"][-3:] == [
+    assert vals["app_include_js"][-4:] == [
         P + "js/native_dashboard_view.js?v=4",
         P + "js/workspace_sidebar_design.js?v=5",
         P + "js/desk_header_search.js?v=1",
+        P + "js/desk_identity.js?v=1",
     ]
     assert len(vals["app_include_css"]) == len(set(vals["app_include_css"]))
     assert len(vals["app_include_js"]) == len(set(vals["app_include_js"]))
