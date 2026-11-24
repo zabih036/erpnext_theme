@@ -184,16 +184,19 @@
 		}
 		const focused = document.activeElement;
 		if (eligibleInput(focused)) portal(focused);
-		// The expanded child editor can be portaled to body between the
-		// native focus event and the asynchronous search_link response.
-		// Re-check its focused Link input after that transition as well;
-		// do not depend solely on an awesomplete-open event arriving later.
-		if (!eligibleInput(focused)) {
-			const editor = document.querySelector(
-				"body > .form-in-grid.st-v7-grid-editor, body > .form-in-grid.st-grid-row-portal"
-			);
-			const focusedLink = editor?.querySelector("input:focus");
-			if (eligibleInput(focusedLink)) portal(focusedLink);
+
+		// Frappe's search_link callback can open Awesomplete AFTER the
+		// focus/open event and AFTER v7 reparents the GridRowForm. Search
+		// only the two affected overlay surfaces for *visible native lists*,
+		// rather than depending on the order of those asynchronous events.
+		// No normal Form or inline grid Link is considered here.
+		for (const surface of document.querySelectorAll(
+			".modal.show, body > .form-in-grid.st-v7-grid-editor, " +
+			"body > .form-in-grid.st-grid-row-portal, .grid-row-open .form-in-grid"
+		)) {
+			for (const input of surface.querySelectorAll(".awesomplete > input")) {
+				if (eligibleInput(input)) portal(input);
+			}
 		}
 	}
 
