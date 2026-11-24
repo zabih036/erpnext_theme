@@ -21,6 +21,7 @@ app_include_css = [
 	"/assets/saas_theme/css/list_view.css?v=2",
 	"/assets/saas_theme/css/home.css?v=13",
 	"/assets/saas_theme/css/brand_shell.css?v=7",
+	"/assets/saas_theme/css/desk_identity.css?v=1",
 	"/assets/saas_theme/css/palette.css?v=1",
 	"/assets/saas_theme/css/interface.css?v=1",
 	"/assets/saas_theme/css/mobile_shell.css?v=2",
@@ -74,6 +75,7 @@ app_include_js = [
 	"/assets/saas_theme/js/native_dashboard_view.js?v=4",
 	"/assets/saas_theme/js/workspace_sidebar_design.js?v=5",
 	"/assets/saas_theme/js/desk_header_search.js?v=1",
+	"/assets/saas_theme/js/desk_identity.js?v=1",
 ]
 
 # -----------------------------------------------------------------------------
