@@ -46,7 +46,7 @@ app_include_css = [
 	"/assets/saas_theme/css/native_dashboard_view_design.css?v=5",
 	"/assets/saas_theme/css/workspace_sidebar_design.css?v=4",
 	"/assets/saas_theme/css/desk_header_finish.css?v=4",
-	"/assets/saas_theme/css/form_autocomplete_layer.css?v=1",
+	"/assets/saas_theme/css/form_autocomplete_layer.css?v=2",
 	"/assets/saas_theme/css/rtl_navbar_alignment.css?v=1",
 	"/assets/saas_theme/css/rtl_workspace_kpi.css?v=3",
 	"/assets/saas_theme/css/rtl_dashboard_cards.css?v=3",
@@ -83,5 +83,5 @@ app_include_js = [
 web_include_css = "/assets/saas_theme/css/login_refinement.css?v=3"
 web_include_js = [
 	"/assets/saas_theme/js/route_loader.js?v=2",
-	"/assets/saas_theme/js/login_fix.js?v=2",
+	"/assets/saas_theme/js/login_fix.js?v=3",
 ]
