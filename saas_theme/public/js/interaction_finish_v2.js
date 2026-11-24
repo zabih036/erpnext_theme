@@ -61,23 +61,48 @@
 		return style.display !== "none" && style.visibility !== "hidden";
 	}
 
-	/* Expanded child-row editor: move the SAME Frappe node above #freeze. */
+	/* Expanded child editor: keep the original Frappe DOM hierarchy.
+	   A body.appendChild(editor) disconnects/reconnects every Item control,
+	   loses input focus, and breaks native GridRowForm ancestry. A native
+	   manual popover promotes the SAME node into the browser top layer
+	   WITHOUT reparenting it. The older body portal remains only as a
+	   fallback for browsers lacking the Popover API. */
 	function portalEditor(editor) {
 		if (!(editor instanceof Element) || editorPortals.has(editor) || !isVisible(editor)) return;
 		const owner = editor.closest(".grid-row");
 		const parent = editor.parentNode;
 		if (!owner || !parent) return;
-		const marker = document.createComment("saas-theme-v7-grid-editor");
-		parent.insertBefore(marker, editor);
-		editorPortals.set(editor, { owner, parent, marker });
+
+		const usePopover = typeof editor.showPopover === "function" &&
+			typeof editor.hidePopover === "function";
+		const meta = { owner, parent, popover: false };
 		owner.classList.add(GRID_OWNER_CLASS);
 		editor.classList.add(GRID_EDITOR_CLASS);
 
-		// Frappe v16 starts a Link search from GridRowForm's focused Item
-		// control. Reparenting that control's ancestor to <body> makes
-		// Chromium blur it. ControlLink.on_input() then DISCARDs the search
-		// response unless its input still has focus (link.js). Keep the
-		// original focused element and caret through this one-time move.
+		if (usePopover) {
+			const originalPopover = editor.getAttribute("popover");
+			editor.setAttribute("popover", "manual");
+			try {
+				editor.showPopover();
+				meta.popover = true;
+				meta.originalPopover = originalPopover;
+				editorPortals.set(editor, meta);
+				document.body.classList.add("st-v7-grid-editor-open");
+				syncModalLayers();
+				return;
+			} catch (_) {
+				// Unsupported popover context: use the legacy editor portal.
+				if (originalPopover == null) editor.removeAttribute("popover");
+				else editor.setAttribute("popover", originalPopover);
+			}
+		}
+
+		// Compatibility fallback only. The supported Chromium/Firefox/Safari
+		// route above never moves the editor or its Link field.
+		const marker = document.createComment("saas-theme-v7-grid-editor");
+		parent.insertBefore(marker, editor);
+		meta.marker = marker;
+		editorPortals.set(editor, meta);
 		const focused = document.activeElement;
 		const insideEditor = focused instanceof HTMLElement && editor.contains(focused);
 		let selection = null;
@@ -87,11 +112,8 @@
 		)) {
 			try {
 				selection = [focused.selectionStart, focused.selectionEnd, focused.selectionDirection];
-			} catch (_) {
-				// Number/date inputs have no text selection API.
-			}
+			} catch (_) { /* Number/date fields have no selection range. */ }
 		}
-
 		document.body.appendChild(editor);
 		if (insideEditor && focused.isConnected && document.activeElement !== focused) {
 			try {
@@ -99,9 +121,7 @@
 				if (selection && selection[0] != null && selection[1] != null) {
 					focused.setSelectionRange(...selection);
 				}
-			} catch (_) {
-				// Focus restoration is best-effort, never block the row editor.
-			}
+			} catch (_) { /* Never break the row editor for focus recovery. */ }
 		}
 		document.body.classList.add("st-v7-grid-editor-open");
 		syncModalLayers();
@@ -110,9 +130,12 @@
 	function restoreEditor(editor) {
 		const meta = editorPortals.get(editor);
 		if (!meta) return;
-		editor.classList.remove(GRID_EDITOR_CLASS);
-		meta.owner?.classList.remove(GRID_OWNER_CLASS);
-		if (meta.parent?.isConnected) {
+		if (meta.popover) {
+			if (editor.matches(":popover-open")) editor.hidePopover();
+			if (meta.originalPopover == null) editor.removeAttribute("popover");
+			else editor.setAttribute("popover", meta.originalPopover);
+			editor.style.removeProperty("visibility");
+		} else if (meta.parent?.isConnected) {
 			if (meta.marker?.parentNode === meta.parent) {
 				meta.parent.insertBefore(editor, meta.marker);
 				meta.marker.remove();
@@ -121,6 +144,8 @@
 			meta.marker?.remove();
 			editor.remove();
 		}
+		editor.classList.remove(GRID_EDITOR_CLASS);
+		meta.owner?.classList.remove(GRID_OWNER_CLASS);
 		editorPortals.delete(editor);
 		if (!editorPortals.size) document.body.classList.remove("st-v7-grid-editor-open");
 	}
@@ -128,7 +153,8 @@
 	function scanEditors() {
 		document.querySelectorAll(".grid-row.grid-row-open .form-in-grid").forEach(portalEditor);
 		for (const [editor, meta] of Array.from(editorPortals.entries())) {
-			if (!meta.owner?.isConnected || !meta.owner.classList.contains("grid-row-open") || !editor.isConnected || !isVisible(editor)) {
+			if (!meta.owner?.isConnected || !meta.owner.classList.contains("grid-row-open") ||
+				!editor.isConnected || !isVisible(editor)) {
 				restoreEditor(editor);
 			}
 		}
@@ -177,6 +203,25 @@
 		backdrops.forEach((backdrop) => backdrop.classList.remove("st-v7-awesomebar-backdrop"));
 		const awesome = modals.find((modal) => modal.querySelector(".navbar-modal-wrapper"));
 		if (awesome && backdrops.length) backdrops[backdrops.length - 1].classList.add("st-v7-awesomebar-backdrop");
+
+		// Popovers outrank CSS z-index, including ordinary Bootstrap dialogs.
+		// Hide only the expanded row's top-layer presentation while a real
+		// dialog is active, so native Link Selector / Advanced Search remains
+		// clickable; restore it after that dialog is dismissed.
+		const dialogOpen = modals.some((modal) => !modal.querySelector(".navbar-modal-wrapper"));
+		for (const [editor, meta] of editorPortals) {
+			if (!meta.popover || !editor.isConnected) continue;
+			if (dialogOpen) {
+				if (editor.matches(":popover-open")) editor.hidePopover();
+				editor.style.setProperty("visibility", "hidden", "important");
+			} else if (meta.owner?.classList.contains("grid-row-open")) {
+				editor.style.removeProperty("visibility");
+				if (!editor.matches(":popover-open")) {
+					try { editor.showPopover(); }
+					catch (_) { /* Row might already be tearing down. */ }
+				}
+			}
+		}
 	}
 
 	/* Inline editable-grid Link popup. Frappe v16 moves the UL to .grid-field,
