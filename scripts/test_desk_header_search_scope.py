@@ -102,9 +102,10 @@ def main() -> None:
         P + "css/workspace_sidebar_design.css?v=4",
         P + "css/desk_header_finish.css?v=4",
     ]
-    assert assets["app_include_js"][-2:] == [
+    assert assets["app_include_js"][-3:] == [
         P + "js/workspace_sidebar_design.js?v=5",
         P + "js/desk_header_search.js?v=1",
+        P + "js/desk_identity.js?v=1",
     ]
     assert len(assets["app_include_css"]) == len(set(assets["app_include_css"]))
     assert len(assets["app_include_js"]) == len(set(assets["app_include_js"]))
