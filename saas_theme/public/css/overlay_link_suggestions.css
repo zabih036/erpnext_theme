@@ -1,0 +1,75 @@
+/*
+ * Native Awesomplete Link lists portaled from:
+ *   1. visible Frappe/Bootstrap dialogs
+ *   2. expanded child-table editors
+ * This surface is intentionally scoped to the single temporary class.
+ * The lists remain the original Frappe DOM nodes, not duplicate options.
+ */
+body > .st-overlay-link-suggestions {
+	box-sizing: border-box !important;
+	position: fixed !important;
+	z-index: 15020 !important; /* JS raises dialogs above their own stacking level. */
+	display: block;
+	list-style: none !important;
+	margin: 0 !important;
+	padding: 6px !important;
+	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
+	border-radius: 11px !important;
+	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+	box-shadow: var(--st-v7-popup-shadow, 0 12px 30px rgba(15, 23, 42, .17)) !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	overscroll-behavior: contain !important;
+	pointer-events: auto !important;
+	-webkit-overflow-scrolling: touch;
+}
+
+body > .st-overlay-link-suggestions[hidden],
+body > .st-overlay-link-suggestions.hide {
+	display: none !important;
+}
+
+body > .st-overlay-link-suggestions > li {
+	box-sizing: border-box !important;
+	display: block;
+	min-height: 34px;
+	margin: 0 !important;
+	padding: 8px 10px !important;
+	border-radius: 7px !important;
+	color: inherit !important;
+	background: transparent !important;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+	overflow-wrap: anywhere;
+}
+
+body > .st-overlay-link-suggestions > li + li {
+	margin-top: 2px !important;
+}
+
+body > .st-overlay-link-suggestions > li:hover,
+body > .st-overlay-link-suggestions > li[aria-selected="true"] {
+	background: var(--st-v7-selected, #eef4ff) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+}
+
+body > .st-overlay-link-suggestions > li :is(strong, p, small, .small) {
+	color: inherit !important;
+}
+body > .st-overlay-link-suggestions > li strong {
+	display: block !important;
+	font-weight: 650;
+}
+body > .st-overlay-link-suggestions > li p,
+body > .st-overlay-link-suggestions > li small,
+body > .st-overlay-link-suggestions > li .small {
+	margin: 2px 0 0;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+/* The menu is independent of the modal and row-editor overflow clips.
+   z-index is set inline to +10 above the ACTUAL owning modal (including
+   a Link Selector opened from a grid) or to 15020 for the child sheet. */
