@@ -136,6 +136,9 @@ sidebar.sidebar_data={label:"Accounts",header_icon:"accounting"};
 
 async function main() {
 	listeners.DOMContentLoaded();
+	assert.ok(links[0].attrs.href.startsWith("data:image/svg+xml,"), (
+		"Frappe favicon must be replaced before the Company logo request resolves"
+	));
 	await new Promise((resolve) => setTimeout(resolve, 10));
 	assert.deepEqual(imageUrls,["https://erp.example.test/files/company-logo.png"]);
 	assert.equal(doc.title,"Accounts Dashboard · Production Company");
