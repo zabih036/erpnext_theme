@@ -110,7 +110,7 @@ def main() -> None:
         "/assets/saas_theme/css/grid_and_action_alignment.css?v=5"
     )
     assert js_assets.index(expected_js) > js_assets.index(
-        "/assets/saas_theme/js/interaction_finish_v2.js?v=11"
+        "/assets/saas_theme/js/interaction_finish_v2.js?v=12"
     )
     assert css_assets.count("/assets/saas_theme/css/brand_shell.css?v=7") == 1
     assert js_assets.count("/assets/saas_theme/js/brand_shell.js?v=5") == 1
