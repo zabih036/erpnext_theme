@@ -57,6 +57,7 @@ on:
       - 'scripts/test_grid_selection_profile_menu.py'
       - 'scripts/test_modal_navbar_profile_responsive.py'
       - 'scripts/test_grid_selection_runtime.js'
+      - 'scripts/test_grid_editor_focus.js'
       - 'scripts/check_theme_deployment.sh'
       - 'README.md'
       - 'scripts/test_search_report_refinements.js'
@@ -129,6 +130,10 @@ jobs:
         run: |
           node --check saas_theme/public/js/overlay_link_suggestions.js
           node scripts/test_overlay_link_suggestions.js
+      - name: Verify Item Link focus and caret survive grid editor portal
+        run: |
+          node --check saas_theme/public/js/interaction_finish_v2.js
+          node scripts/test_grid_editor_focus.js
       - name: Validate personal language switching and menu placement
         run: |
           python3 -m py_compile saas_theme/language.py
