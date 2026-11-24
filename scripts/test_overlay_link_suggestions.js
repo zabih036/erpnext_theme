@@ -95,10 +95,12 @@ function setupField(surface,type="Link",inline=false){
 }
 const dialogField=setupField(modal);
 const gridField=setupField(editor,"Dynamic Link");
-const inlineField=setupField(editor,"Link",true);
+const nestedExpandedItemField=setupField(editor,"Link",true);
+// A true inline cell is outside .form-in-grid and must remain owned by v7.
+const inlineField=setupField(new FakeNode("GRID"),"Link",true);
 const outside=new HTMLInputElementMock(new FakeNode("NORMAL"),"Link");
 
-const all=[dialogField,gridField,inlineField];
+const all=[dialogField,gridField,nestedExpandedItemField,inlineField];
 const doc={
 	body,readyState:"loading",
 	documentElement:{clientWidth:900,clientHeight:750},
@@ -156,6 +158,19 @@ async function run(){
 	flush();
 	signal("awesomplete-close",gridField.input);
 	assert.equal(gridField.ul.parentNode,gridField.wrapper,"hidden grid suggestions return to field");
+	// The Purchase Invoice Item field can open before Frappe has finished
+	// moving the GridRowForm from an editable table row to <body>. It is
+	// an expanded child editor despite having an .editable-row ancestor.
+	await opened(nestedExpandedItemField);
+	assert.equal(nestedExpandedItemField.ul.parentNode,body,
+		"Item Link suggestions must be portaled even in the editor's initial nested state");
+	const pointer={target:{closest:(selector)=>selector.includes("st-overlay-link-suggestions")?nestedExpandedItemField.ul:null},
+		preventDefault(){this.prevented=true;},prevented:false};
+	events.get("mousedown")(pointer);
+	assert.equal(pointer.prevented,true,"Option press keeps Item input focused");
+	assert.equal(doc.activeElement,nestedExpandedItemField.input);
+	signal("awesomplete-close",nestedExpandedItemField.input);
+	assert.equal(nestedExpandedItemField.ul.parentNode,nestedExpandedItemField.wrapper);
 	doc.activeElement=inlineField.input;
 	signal("awesomplete-open",inlineField.input);
 	await Promise.resolve();flush();
