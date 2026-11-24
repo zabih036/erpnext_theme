@@ -16,6 +16,7 @@ on:
       - 'scripts/test_report_filter_geometry.js'
       - 'scripts/test_report_list_readability.py'
       - 'scripts/test_grid_currency_link_icon_visibility.py'
+      - 'scripts/test_overlay_link_suggestions.js'
       - 'scripts/test_desk_identity.js'
       - 'saas_theme/public/js/desk_identity.js'
       - 'saas_theme/public/css/desk_identity.css'
@@ -124,6 +125,10 @@ jobs:
         run: python3 scripts/test_report_list_readability.py
       - name: Validate inline Currency amounts and Link Clear icons
         run: python3 scripts/test_grid_currency_link_icon_visibility.py
+      - name: Validate native dropdown options over modals and expanded child-row editors
+        run: |
+          node --check saas_theme/public/js/overlay_link_suggestions.js
+          node scripts/test_overlay_link_suggestions.js
       - name: Validate personal language switching and menu placement
         run: |
           python3 -m py_compile saas_theme/language.py
