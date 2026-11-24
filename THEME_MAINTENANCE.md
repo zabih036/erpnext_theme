@@ -1417,3 +1417,43 @@ the scoped active state, the tabbed Form path, the grid containment and
 the original menu visibility behavior. Live ERPNext verification is still
 required for Supplier on Purchase Invoice, English/RTL, light/dark, narrow
 screens, and normal/empty suggestion lists.
+
+### Browser tab branding and selected Sidebar header icon (24 November 2026)
+
+Two separate Desk identity regressions were reported on Accounts Dashboard:
+
+1. **Browser tab:** Frappe v16 `desk.js.set_favicon()` creates its
+   own favicon `<link>` nodes and its native route title is just the
+   current page (e.g. "Accounts Dashboard"). The theme now has a scoped
+   `desk_identity.js?v=1` controller that reads the same configured
+   default Company branding endpoint as the Login and Navbar, waits for
+   the public company logo to load, then updates the browser favicon.
+   The tab continues to identify the current page and adds the
+   company name only as a suffix: `<Page> · <Company>`.
+   If a logo cannot be loaded or is private, an SVG initial/monogram
+   favicon is used instead of the default Frappe mark. No raw private
+   File URL is requested; the favicon is not changed outside Desk.
+   A bounded observer repairs Frappe route-driven title/icon rewrites
+   without modifying `frappe.utils.set_title()` or the router cache.
+
+2. **Sidebar workspace icon:** With the native Frappe Dock disabled,
+   `SidebarHeader.get_header_logo()` returns the app logo even when
+   `Sidebar.current_module` is "Accounts". The Desk identity controller
+   replaces the **visual icon only** in the actual
+   `.body-sidebar .sidebar-header .header-logo` after native updates.
+   It reuses the selected custom workspace rail's rendered icon when it
+   matches the Sidebar, or the selected Sidebar's configured
+   `header_icon` from `frappe.boot.workspace_sidebar_item` / module
+   sidebar data. It falls back to the current workspace initial, never
+   the unrelated application's logo. The existing header label,
+   click target, sidebar menu, link events, and collapse state remain
+   Frappe-owned.
+
+The changes are isolated to `desk_identity.js?v=1`,
+`desk_identity.css?v=1`, the canonical `hooks.py` and architecture
+asset manifest, and a dedicated mocked-runtime regression test.
+Existing Desk styles, widget geometry, authentication, and report
+behavior are untouched. Check Accounts/Stock/Purchasing switches,
+browser title/favicon after repeated navigation, Dark Mode and RTL,
+and the Company Logo URL on the deployed site. Browser favicon
+caching may require a full refresh.
