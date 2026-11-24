@@ -1525,3 +1525,38 @@ Live acceptance: in Purchase Invoice, open an Items row's **Edit**
 view, click or type in **Item**, select a suggestion, confirm the
 selected Item persists after closing/reopening the row, and repeat
 with keyboard, RTL and narrow screens.
+
+### Focus loss during the expanded Item row editor move (2026-11-25)
+
+**Confirmed browser behavior.** Chromium drops DOM focus when the theme
+moves an ancestor of the active input from the original grid row into
+`document.body` via `appendChild(editor)`. This was reproduced in
+headless Chromium: `document.activeElement` changed from the focused
+Item input to `BODY` immediately after moving the editor.
+
+**Why that breaks Item lookup.** Frappe v16
+`frappe/public/js/frappe/form/controls/link.js` checks
+`!this.$input.is(":focus")` before processing the asynchronous
+`frappe.desk.search.search_link` response. Thus a search started just
+before the row-editor move can be silently discarded even when
+correct options were returned. Earlier theme PRs #4 and #5 altered
+where Awesomplete suggestions display, but did not address this
+focus-loss path.
+
+**Fix.** `interaction_finish_v2.js?v=11` captures an active control
+within the expanded `.form-in-grid`, moves the **same** editor node
+without cloning or changing Frappe's Link handlers, and restores
+the prior control's focus without scrolling and with its original
+text selection range when applicable. It never steals focus when
+the user is working elsewhere, and still moves each editor only
+once. Native DOM order, row selection, permissions, search requests,
+and other modal overlays remain unchanged.
+
+**Verification.** `scripts/test_grid_editor_focus.js` runs the actual
+`portalEditor` implementation under a simulated browser DOM that
+blurs the active input on reparenting. It asserts restored focus,
+caret, one-time move, and no focus theft from an unrelated control.
+Manual browser verification of the blur behavior was performed in
+headless Chromium. Final on-site validation must test Purchase Invoice
+→ Items → Edit → Item, including picking an item, keyboard selection,
+and returning to the child table; CI does not connect to ERPNext.
