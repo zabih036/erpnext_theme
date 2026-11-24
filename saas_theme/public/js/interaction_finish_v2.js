@@ -72,7 +72,37 @@
 		editorPortals.set(editor, { owner, parent, marker });
 		owner.classList.add(GRID_OWNER_CLASS);
 		editor.classList.add(GRID_EDITOR_CLASS);
+
+		// Frappe v16 starts a Link search from GridRowForm's focused Item
+		// control. Reparenting that control's ancestor to <body> makes
+		// Chromium blur it. ControlLink.on_input() then DISCARDs the search
+		// response unless its input still has focus (link.js). Keep the
+		// original focused element and caret through this one-time move.
+		const focused = document.activeElement;
+		const insideEditor = focused instanceof HTMLElement && editor.contains(focused);
+		let selection = null;
+		if (insideEditor && (
+			focused instanceof HTMLInputElement ||
+			focused instanceof HTMLTextAreaElement
+		)) {
+			try {
+				selection = [focused.selectionStart, focused.selectionEnd, focused.selectionDirection];
+			} catch (_) {
+				// Number/date inputs have no text selection API.
+			}
+		}
+
 		document.body.appendChild(editor);
+		if (insideEditor && focused.isConnected && document.activeElement !== focused) {
+			try {
+				focused.focus({ preventScroll: true });
+				if (selection && selection[0] != null && selection[1] != null) {
+					focused.setSelectionRange(...selection);
+				}
+			} catch (_) {
+				// Focus restoration is best-effort, never block the row editor.
+			}
+		}
 		document.body.classList.add("st-v7-grid-editor-open");
 		syncModalLayers();
 	}
