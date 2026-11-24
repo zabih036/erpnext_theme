@@ -23,6 +23,7 @@ EXPECTED_DESK_CSS = [
     "/assets/saas_theme/css/list_view.css?v=2",
     "/assets/saas_theme/css/home.css?v=13",
     "/assets/saas_theme/css/brand_shell.css?v=7",
+	"/assets/saas_theme/css/desk_identity.css?v=1",
     "/assets/saas_theme/css/palette.css?v=1",
     "/assets/saas_theme/css/interface.css?v=1",
     "/assets/saas_theme/css/mobile_shell.css?v=2",
@@ -76,6 +77,7 @@ EXPECTED_DESK_JS = [
     "/assets/saas_theme/js/native_dashboard_view.js?v=4",
     "/assets/saas_theme/js/workspace_sidebar_design.js?v=5",
     "/assets/saas_theme/js/desk_header_search.js?v=1",
+	"/assets/saas_theme/js/desk_identity.js?v=1",
 ]
 
 EXPECTED_WEB_CSS = "/assets/saas_theme/css/login_refinement.css?v=3"
@@ -86,6 +88,7 @@ EXPECTED_WEB_JS = [
 
 KNOWN_CSS_FILES = {
     "brand_shell.css",
+    "desk_identity.css",
     "child_row_editor_finish.css",
     "child_table_ui.css",
     "precision.css",
@@ -158,6 +161,7 @@ KNOWN_JS_FILES = {
     "workspace_dashboard.js",
     "workspace_sidebar_design.js",
     "desk_header_search.js",
+    "desk_identity.js",
     "native_dashboard_view.js",
 }
 
