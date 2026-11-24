@@ -1457,3 +1457,39 @@ behavior are untouched. Check Accounts/Stock/Purchasing switches,
 browser title/favicon after repeated navigation, Dark Mode and RTL,
 and the Company Logo URL on the deployed site. Browser favicon
 caching may require a full refresh.
+
+### Native Link/Autocomplete suggestions in dialogs and expanded child rows
+
+**Cause:** Frappe v16's Awesomplete dropdown is a `ul` below the input's
+Awesomplete wrapper. Unlike the regular Form and inline editable grid,
+expanded child-table sheets have their own `.grid-form-body`
+`overflow-x:hidden; overflow-y:auto` and collapsible section
+`overflow:hidden` rules. Dialogs have their own scrollable, layered body.
+A z-index on the field or list cannot escape those ancestor clips or the
+dialog stacking context, so the options can appear **behind the visible
+modal/sheet** and cannot be selected. The existing
+`interaction_finish_v2.js` grid-popup portal is correctly scoped to
+`.form-grid .editable-row` and does not apply to a modal or expanded
+grid-row editor.
+
+**Scoped repair:** `overlay_link_suggestions.js?v=1` temporarily reparents
+the **same native Awesomplete list** to document body when a Link,
+Dynamic Link or Autocomplete input opens it inside a visible dialog or
+expanded grid editor. It anchors the list to the input viewport rectangle
+with a capped width/height, flips above the field when necessary, and
+calculates its layer relative to the owning modal (or 15020 for the
+12010 child-editor layer). `overlay_link_suggestions.css?v=1` gives
+only that temporary list an opaque, scrollable selectable surface.
+Close, change-page and destroyed-editor paths restore the list to its
+original parent with its original inline styles and existing Frappe
+events/handlers. Frappe still creates the suggestions, validates selection,
+and owns the Link value; the theme does **not** reimplement autocomplete.
+Normal form Link fields, inline table cells, Awesome Bar, navigation and
+other modals are unchanged.
+
+A mock runtime regression check covers both surfaces, z-order, the
+same-node move/restore, old inline-grid isolation and event registration.
+The CI suite also checks the architecture and unrelated theme behaviors.
+After deploy, verify Currency Exchange modal's Currency Link, Purchase
+Invoice Item child editor, keyboard navigation, mouse selection, scrolling,
+compact screens, Pashto/Dari and dark theme on the real Frappe site.
