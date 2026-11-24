@@ -128,6 +128,7 @@ const win={
 	addEventListener(name,listener){events.set("window:"+name,listener);},
 };
 const windowContext={window:win,document:doc,Element:FakeNode,HTMLInputElement:HTMLInputElementMock,
+	MutationObserver:win.MutationObserver,
 	requestAnimationFrame(fn){queue.push(fn);return queue.length;},
 	setTimeout(fn){timeout.push(fn);},queueMicrotask(fn){Promise.resolve().then(fn);},
 	console};
