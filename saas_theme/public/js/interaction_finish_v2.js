@@ -153,8 +153,10 @@
 	function scanEditors() {
 		document.querySelectorAll(".grid-row.grid-row-open .form-in-grid").forEach(portalEditor);
 		for (const [editor, meta] of Array.from(editorPortals.entries())) {
+			const pausedForDialog = meta.popover &&
+				editor.style.getPropertyValue("visibility") === "hidden";
 			if (!meta.owner?.isConnected || !meta.owner.classList.contains("grid-row-open") ||
-				!editor.isConnected || !isVisible(editor)) {
+				!editor.isConnected || (!isVisible(editor) && !pausedForDialog)) {
 				restoreEditor(editor);
 			}
 		}
