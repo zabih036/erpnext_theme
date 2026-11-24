@@ -110,6 +110,7 @@
 		state.headObserver = new MutationObserver((records) => {
 			if (records.some((record) =>
 				record.target?.nodeName === "TITLE" ||
+				(record.type === "characterData" && record.target?.parentNode?.nodeName === "TITLE") ||
 				record.target?.nodeName === "LINK" ||
 				Array.from(record.addedNodes || []).some((node) =>
 					node.nodeName === "TITLE" || node.nodeName === "LINK"
@@ -154,7 +155,10 @@
 
 			const fallback = String(frappe.boot?.sysdefaults?.company || "").trim();
 			state.company = company || fallback;
-			const candidate = logo || safeLogoUrl(frappe.boot?.navbar_settings?.app_logo);
+			const siteLogo = safeLogoUrl(frappe.boot?.navbar_settings?.app_logo);
+			const candidate = logo || (
+				/\/assets\/frappe\/(?:images\/|.*favicon)/i.test(siteLogo) ? "" : siteLogo
+			);
 			const fallbackName = state.company || String(frappe.boot?.app_name || "Production");
 			state.iconUrl = candidate && await loadImage(candidate)
 				? candidate
@@ -195,8 +199,12 @@
 				// An invalid custom icon must not break the page header.
 			}
 		}
-		// Don't show a second app or Frappe logo if the Sidebar has no icon.
-		return "";
+		// Match the Sidebar rail's own letter fallback when no icon has been
+		// configured. Never leave the previous app's logo in the active header.
+		const initial = String(sideName || moduleName).charAt(0).toUpperCase()
+			.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+		return '<span class="st-sidebar-workspace-initial" aria-hidden="true">' + initial + '</span>';
 	}
 
 	function bindHeaderObserver(node) {
