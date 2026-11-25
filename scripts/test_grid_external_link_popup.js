@@ -113,6 +113,7 @@ const win={
 };
 const $=()=>({on(){}});
 const ctx={window:win,document:doc,HTMLInputElement:Input,
+	MutationObserver:win.MutationObserver,
 	requestAnimationFrame(fn){frames.push(fn);return frames.length;},
 	console, setTimeout, clearTimeout};
 vm.runInNewContext(src,ctx);
