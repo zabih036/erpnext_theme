@@ -1,0 +1,171 @@
+/*
+ * Link input polish + external picker bridge for Frappe 16.
+ *
+ * The theme's original .link-field rules force display:flex !important
+ * on clear/open buttons. That defeats Frappe ControlLink's native
+ * jQuery .toggle(false) and paints a second bordered button group beside
+ * the input. Keep controls INSIDE one polished field and respect Frappe's
+ * exact inline visibility state; don't redefine Link values or search.
+ */
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field {
+	position: relative !important;
+	box-sizing: border-box !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field :is(.input-with-feedback, .form-control) {
+	box-sizing: border-box !important;
+	display: block !important;
+	width: 100% !important;
+	min-height: 40px !important;
+	padding-inline-start: 12px !important;
+	padding-inline-end: 72px !important;
+	border: 1px solid var(--st-v7-border-strong, var(--border-color, #d9e2ec)) !important;
+	border-radius: 10px !important;
+	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, .04) !important;
+	transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field :is(.input-with-feedback, .form-control):focus {
+	border-color: var(--st-v7-primary, #0759e6) !important;
+	outline: none !important;
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--st-v7-primary, #0759e6) 13%, transparent),
+		0 2px 6px rgba(15, 23, 42, .055) !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn {
+	box-sizing: border-box !important;
+	position: absolute !important;
+	top: 50% !important;
+	inset-inline-start: auto !important;
+	inset-inline-end: 6px !important;
+	transform: translateY(-50%) !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: 2px !important;
+	width: max-content !important;
+	min-width: 0 !important;
+	height: 30px !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 8px !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	pointer-events: auto !important;
+}
+
+/* Never force a control visible when Frappe explicitly hides it.
+   Avoid the brittle ':not([style*=display])' rule: jQuery may remove
+   inline display when it SHOWS the action group. */
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn[style*="display: none"],
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn[style*="display:none"] {
+	display: none !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn :is(.btn-open, .btn-clear) {
+	box-sizing: border-box !important;
+	align-items: center !important;
+	justify-content: center !important;
+	flex: 0 0 28px !important;
+	width: 28px !important;
+	min-width: 28px !important;
+	height: 28px !important;
+	min-height: 28px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 7px !important;
+	background: transparent !important;
+	color: var(--st-v7-muted, #667085) !important;
+	box-shadow: none !important;
+	cursor: pointer !important;
+	pointer-events: auto !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn :is(.btn-open, .btn-clear):hover {
+	background: var(--st-v7-primary-soft, #eef4ff) !important;
+	color: var(--st-v7-primary, #0759e6) !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn :is(.btn-open, .btn-clear):focus-visible {
+	outline: 2px solid var(--st-v7-primary, #0759e6) !important;
+	outline-offset: 1px !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn :is(.btn-open, .btn-clear)[style*="display: none"],
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn :is(.btn-open, .btn-clear)[style*="display:none"] {
+	display: none !important;
+}
+
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn svg {
+	width: 15px !important;
+	height: 15px !important;
+	color: currentColor !important;
+	stroke: currentColor !important;
+	stroke-width: 1.8 !important;
+}
+
+/* A separate searchable Link picker is often rendered beside <body>,
+   outside the opened child editor. A regular z-index can NEVER pass
+   the editor's native popover top layer. JS elevates only the picker
+   matching the focused Item field to a second native popover. */
+body .st-grid-external-link-popup:popover-open {
+	box-sizing: border-box !important;
+	position: fixed !important;
+	z-index: 15040 !important;
+	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
+	border-radius: 12px !important;
+	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
+	color: var(--st-v7-text, var(--text-color, #172033)) !important;
+	box-shadow: 0 12px 32px rgba(15, 23, 42, .16) !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	overscroll-behavior: contain !important;
+	pointer-events: auto !important;
+	-webkit-overflow-scrolling: touch;
+}
+
+[data-theme="dark"] body .st-grid-external-link-popup:popover-open {
+	box-shadow: 0 14px 38px rgba(0, 0, 0, .34) !important;
+}
+
+@media (max-width: 767px) {
+	body .frappe-control:is(
+		[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+	) .link-field :is(.input-with-feedback, .form-control) {
+		min-height: 42px !important;
+	}
+}
