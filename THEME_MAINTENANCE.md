@@ -1651,3 +1651,55 @@ Guest/private URL isolation), and existing Desk/controller regressions.
 The browser centering result was separately verified locally at
 wide and narrow viewport sizes. Live ERPNext testing remains
 necessary before merging into production.
+
+### External Link pickers above native child-row popovers; consistent input actions
+
+The persistent **Purchase Invoice > Items > pencil Edit > Item** failure
+was not solved by earlier CSS z-index changes or Awesomplete-only UL
+portals. The theme intentionally opens the expanded GridRowForm using
+`showPopover()`, which places the editor in the browser's **top layer**.
+Any Link picker whose visible menu is rendered elsewhere under
+`document.body` remains **behind** this editor even with
+`z-index:9999999`. Chromium's hit-testing confirms the body-level
+menu is not clickable in this arrangement. Some richer searchable Link
+pickers have their own header/search/footer and are not the
+`.awesomplete > ul` covered by previous fixes.
+
+`grid_external_link_popup.js?v=1` is restricted to a focused Link,
+Dynamic Link, or Autocomplete input in an **open expanded editor**.
+It finds visible, geometrically adjacent Link menus, including a
+separate searchable menu card containing a listbox and search input.
+The menu DOM, native handlers and values are never cloned/moved.
+Instead the existing menu is temporarily promoted with
+`popover="manual"` and `showPopover()` above the editor's top layer
+then positioned beside the Item input. Provider display/hide behavior,
+embedded search focus and click events remain native. On closing,
+route change, hidden options, or an Advanced Search modal, the menu's
+original popover attribute and inline styles are restored. Normal
+Supplier links and unrelated page menus are never promoted.
+
+`link_control_polish.css?v=1` addresses the separate cosmetic defect:
+the theme had forced `display:inline-flex!important` on every Link
+clear/open control, overriding Frappe v16 `.toggle(false)` and
+producing a second grey/outlined input-like box beside Supplier/Item
+fields. The scoped correction gives the input a single consistent
+surface; positions the action icons **inside** it using logical
+padding/offsets for LTR/RTL; honors explicit native `display:none`;
+and uses the original accessible Frappe Open SVG rather than an extra
+CSS pseudo-icon. It affects Link/Dynamic Link fields only, not
+validation, query permissions or their stored values.
+
+Tests: `scripts/test_grid_external_link_popup.js` exercises a
+standalone searchable Link popup, preserves its native DOM, embedded
+search focus, closure, normal Supplier isolation and modal precedence.
+A separate real Chromium click repro confirmed ordinary body menus
+lose hit-testing to a top-layer editor even with extreme z-index, and
+that promoting the menu to a second top layer makes selection click
+work. CI also runs existing child-row/modal/RTL regression checks.
+
+**Deployment acceptance is still mandatory**: on the actual ERPNext
+site open Purchase Invoice > Items > pencil Edit > Item; click/keyboard
+select Item, verify its model value and reopen the row. Also check
+Supplier search, quick-entry Link, Advanced Search, English/Pashto/Dari,
+mobile and dark mode. Without the authenticated runtime DOM, the
+exact provider-specific menu markup cannot be independently verified.
