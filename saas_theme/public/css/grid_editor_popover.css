@@ -1,104 +1,221 @@
 /*
- * Expanded GridRowForm in the native browser top layer.
+ * SaaS Theme — native GridRowForm top-layer presentation (Frappe v16).
  *
- * Frappe v16 keeps .form-in-grid INSIDE its owning .grid-row. Do not
- * reparent the editor or its Item Link: that breaks focus and DOM
- * ancestry. CSS popover layering escapes parent overflow and #freeze.
- * Other forms, inline child cells and regular dialogs are unchanged.
+ * Keep the original editor and Awesomplete UL in their Frappe DOM parents.
+ * Only the expanded, open child-row popover is affected.
+ *
+ * The previous rule set left:50% then inset-inline:auto !important.
+ * In Chromium the logical property reset physical left to 0; the
+ * translateX(-50%) shifted half the editor OFF the viewport. It also
+ * missed the link-action rules limited to body > .form-in-grid.
  */
+
 body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open {
 	box-sizing: border-box !important;
+	display: block !important;
 	position: fixed !important;
 	top: 14px !important;
 	right: auto !important;
 	bottom: 14px !important;
 	left: 50% !important;
-	inset-inline: auto !important;
-	width: min(1240px, calc(100vw - 32px)) !important;
+	/* Do not set inset-inline here: it overrides physical left in RTL/LTR. */
+	width: min(1180px, calc(100vw - 32px)) !important;
 	max-width: calc(100vw - 32px) !important;
 	max-height: calc(100dvh - 28px) !important;
 	height: auto !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	transform: translateX(-50%) !important;
-	overflow-y: auto !important;
 	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	overscroll-behavior: contain !important;
 	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
 	border-radius: 16px !important;
 	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
 	color: var(--st-v7-text, var(--text-color, #172033)) !important;
-	box-shadow: var(--st-v7-editor-shadow, 0 22px 56px rgba(15, 23, 42, .20)) !important;
-	overscroll-behavior: contain !important;
+	box-shadow: var(--st-v7-editor-shadow, 0 22px 56px rgba(15, 23, 42, .18)) !important;
 	z-index: 12010 !important;
 }
 
-/* Scroll the sheet itself, not an inner clipped container: a native Link
- * popup has room to render; the Awesomplete list uses a second top-layer
- * popover to remain visible regardless of the Item field's position. */
-body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .grid-form-body {
-	box-sizing: border-box !important;
-	height: auto !important;
-	max-height: none !important;
-	overflow: visible !important;
-	padding: 16px !important;
-	background: var(--st-v7-surface-soft, #f8fafc) !important;
-}
-
-body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .form-section,
-body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open .section-body {
-	overflow: visible !important;
-}
-
-body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor:popover-open > .grid-form-heading {
+/* One scrolling surface and one outer shadow, instead of a sheet inside a
+ * shadowed form-area inside further shadowed section cards. */
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open > .grid-form-heading {
 	position: sticky !important;
 	top: 0 !important;
 	z-index: 5 !important;
+	min-height: 56px !important;
+	border: 0 !important;
+	border-bottom: 1px solid var(--st-v7-border, #d9e2ec) !important;
+	border-radius: 0 !important;
+	background: var(--st-v7-surface, #fff) !important;
+	box-shadow: none !important;
 }
 
-/* Native UL stays BELOW the editor in DOM but ABOVE it in the browser
- * top-layer ordering; no cloning or event rebinding. */
-body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open,
-body .grid-row.grid-row-open .form-in-grid .awesomplete > [role="listbox"].st-overlay-link-suggestions:popover-open {
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .grid-form-body {
+	box-sizing: border-box !important;
+	height: auto !important;
+	max-height: none !important;
+	padding: 14px 18px 22px !important;
+	overflow: visible !important;
+	background: var(--st-v7-surface-soft, #f8fafc) !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .form-area {
+	box-sizing: border-box !important;
+	width: 100% !important;
+	max-width: none !important;
+	margin: 0 auto !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	overflow: visible !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .form-section {
+	box-shadow: none !important;
+	overflow: visible !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .form-section:has(> .section-head.collapsible) {
+	margin: 10px 0 !important;
+	border: 1px solid var(--st-v7-border, #d9e2ec) !important;
+	border-radius: 11px !important;
+	background: var(--st-v7-surface, #fff) !important;
+	box-shadow: none !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .section-body {
+	box-shadow: none !important;
+	overflow: visible !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .section-body.hide {
+	display: none !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .grid-header-toolbar {
+	gap: 8px !important;
+	padding: 8px 16px !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .grid-header-toolbar .row-actions {
+	flex-wrap: wrap !important;
+	gap: 6px !important;
+}
+
+/* Fix the orphan clear/open action borders beside empty Item fields.
+ * The original correction in ui_consolidation_v7.css only targets
+ * body > .form-in-grid; the native editor is now inside its grid-row,
+ * so those rules no longer match. Restore Frappe's actual show/hide
+ * contract and don't paint a separate outlined link-action "input". */
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field {
+	position: relative !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .form-control,
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .input-with-feedback {
+	padding-inline-end: 72px !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn {
+	box-sizing: border-box !important;
+	position: absolute !important;
+	top: 50% !important;
+	right: 6px !important;
+	left: auto !important;
+	transform: translateY(-50%) !important;
+	width: max-content !important;
+	min-width: 0 !important;
+	height: 28px !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	gap: 3px !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	pointer-events: none !important;
+	z-index: 3 !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn:not([style*="display"]),
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn[style*="display: none"],
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn[style*="display:none"] {
+	display: none !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn > a {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 28px !important;
+	height: 28px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 1px solid var(--st-v7-border, #d9e2ec) !important;
+	border-radius: 8px !important;
+	background: var(--st-v7-surface-subtle, #f4f7fb) !important;
+	box-shadow: none !important;
+	pointer-events: auto !important;
+}
+
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn > a[style*="display: none"],
+body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .link-field .link-btn > a[style*="display:none"] {
+	display: none !important;
+}
+
+/* A native Awesomplete list is promoted to a second browser top layer
+ * without moving its original <ul> away from Frappe's control. The fixed
+ * anchor coordinates are assigned by overlay_link_suggestions.js. */
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor .awesomplete > ul.st-overlay-link-suggestions:popover-open,
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor .awesomplete > [role="listbox"].st-overlay-link-suggestions:popover-open {
 	box-sizing: border-box !important;
 	position: fixed !important;
 	display: block !important;
 	margin: 0 !important;
 	padding: 6px !important;
 	border: 1px solid var(--st-v7-border, var(--border-color, #d9e2ec)) !important;
-	border-radius: 11px !important;
+	border-radius: 10px !important;
 	background: var(--st-v7-surface, var(--fg-color, #fff)) !important;
 	color: var(--st-v7-text, var(--text-color, #172033)) !important;
-	box-shadow: var(--st-v7-popup-shadow, 0 12px 30px rgba(15, 23, 42, .17)) !important;
+	box-shadow: var(--st-v7-popup-shadow, 0 12px 28px rgba(15, 23, 42, .14)) !important;
 	overflow-x: hidden !important;
 	overflow-y: auto !important;
-	pointer-events: auto !important;
 	overscroll-behavior: contain !important;
+	pointer-events: auto !important;
 }
 
-body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li,
-body .grid-row.grid-row-open .form-in-grid .awesomplete > [role="listbox"].st-overlay-link-suggestions:popover-open > li {
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor .awesomplete > ul.st-overlay-link-suggestions:popover-open > li {
 	display: block !important;
 	min-height: 34px !important;
-	padding: 8px 10px !important;
 	margin: 0 0 2px !important;
+	padding: 8px 10px !important;
 	border-radius: 7px !important;
-	background: transparent !important;
 	color: inherit !important;
+	background: transparent !important;
 	cursor: pointer !important;
 }
 
-body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li:hover,
-body .grid-row.grid-row-open .form-in-grid .awesomplete > ul.st-overlay-link-suggestions:popover-open > li[aria-selected="true"] {
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor .awesomplete > ul.st-overlay-link-suggestions:popover-open > li:hover,
+body .grid-row.grid-row-open .form-in-grid.st-v7-grid-editor .awesomplete > ul.st-overlay-link-suggestions:popover-open > li[aria-selected="true"] {
 	background: var(--st-v7-selected, #eef4ff) !important;
 }
 
 @media (max-width: 767px) {
 	body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open {
-		width: calc(100vw - 16px) !important;
-		max-width: calc(100vw - 16px) !important;
 		top: 8px !important;
 		bottom: 8px !important;
+		left: 50% !important;
+		width: calc(100vw - 16px) !important;
+		max-width: calc(100vw - 16px) !important;
 		max-height: calc(100dvh - 16px) !important;
+		transform: translateX(-50%) !important;
 		border-radius: 12px !important;
+	}
+	body .grid-row.grid-row-open > .form-in-grid.st-v7-grid-editor:popover-open .grid-form-body {
+		padding: 10px 12px 16px !important;
 	}
 }
