@@ -23,6 +23,7 @@ app_include_css = [
 	"/assets/saas_theme/css/brand_shell.css?v=7",
 	"/assets/saas_theme/css/desk_identity.css?v=1",
 	"/assets/saas_theme/css/grid_editor_popover.css?v=2",
+	"/assets/saas_theme/css/link_control_polish.css?v=1",
 	"/assets/saas_theme/css/overlay_link_suggestions.css?v=1",
 	"/assets/saas_theme/css/palette.css?v=1",
 	"/assets/saas_theme/css/interface.css?v=1",
@@ -54,7 +55,6 @@ app_include_css = [
 	"/assets/saas_theme/css/rtl_workspace_kpi.css?v=3",
 	"/assets/saas_theme/css/rtl_dashboard_cards.css?v=3",
 	"/assets/saas_theme/css/rtl_form_link_actions.css?v=3",
-	"/assets/saas_theme/css/link_control_polish.css?v=1",
 ]
 
 app_include_js = [
