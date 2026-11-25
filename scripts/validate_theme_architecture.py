@@ -56,6 +56,7 @@ EXPECTED_DESK_CSS = [
     "/assets/saas_theme/css/rtl_workspace_kpi.css?v=3",
     "/assets/saas_theme/css/rtl_dashboard_cards.css?v=3",
     "/assets/saas_theme/css/rtl_form_link_actions.css?v=3",
+    "/assets/saas_theme/css/link_control_polish.css?v=1",
 ]
 
 EXPECTED_DESK_JS = [
@@ -76,6 +77,7 @@ EXPECTED_DESK_JS = [
     "/assets/saas_theme/js/quick_access_preferences.js?v=3",
     "/assets/saas_theme/js/interaction_finish_v2.js?v=12",
     "/assets/saas_theme/js/overlay_link_suggestions.js?v=3",
+    "/assets/saas_theme/js/grid_external_link_popup.js?v=1",
     "/assets/saas_theme/js/grid_row_selection_repair.js?v=1",
     "/assets/saas_theme/js/workspace_dashboard.js?v=2",
     "/assets/saas_theme/js/native_dashboard_view.js?v=4",
@@ -117,6 +119,7 @@ KNOWN_CSS_FILES = {
     "overlay_layers.css",
     "overlay_link_suggestions.css",
     "grid_editor_popover.css",
+    "link_control_polish.css",
     "professional_ui.css",
     "report_and_form_shell.css",
     "saas_theme.css",
@@ -149,6 +152,7 @@ KNOWN_JS_FILES = {
     "inline_grid_link_popup_anchor_v5.js",
     "interaction_finish_v2.js",
     "overlay_link_suggestions.js",
+    "grid_external_link_popup.js",
     "grid_row_selection_repair.js",
     "login_fix.js",
     "list_view.js",
