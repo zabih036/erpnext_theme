@@ -54,6 +54,7 @@ app_include_css = [
 	"/assets/saas_theme/css/rtl_workspace_kpi.css?v=3",
 	"/assets/saas_theme/css/rtl_dashboard_cards.css?v=3",
 	"/assets/saas_theme/css/rtl_form_link_actions.css?v=3",
+	"/assets/saas_theme/css/link_control_polish.css?v=1",
 ]
 
 app_include_js = [
@@ -74,6 +75,7 @@ app_include_js = [
 	"/assets/saas_theme/js/quick_access_preferences.js?v=3",
 	"/assets/saas_theme/js/interaction_finish_v2.js?v=12",
 	"/assets/saas_theme/js/overlay_link_suggestions.js?v=3",
+	"/assets/saas_theme/js/grid_external_link_popup.js?v=1",
 	"/assets/saas_theme/js/grid_row_selection_repair.js?v=1",
 	"/assets/saas_theme/js/workspace_dashboard.js?v=2",
 	"/assets/saas_theme/js/native_dashboard_view.js?v=4",
