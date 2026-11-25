@@ -19,6 +19,9 @@ on:
       - 'scripts/test_overlay_link_suggestions.js'
       - 'scripts/test_native_grid_editor_popover.js'
       - 'scripts/test_desk_identity.js'
+      - 'scripts/test_initial_desk_branding.py'
+      - 'scripts/test_child_editor_popover_layout.py'
+      - 'saas_theme/branding.py'
       - 'saas_theme/public/js/desk_identity.js'
       - 'saas_theme/public/css/desk_identity.css'
       - 'scripts/test_production_login_branding.py'
@@ -76,6 +79,12 @@ jobs:
         run: |
           node --check saas_theme/public/js/desk_identity.js
           node scripts/test_desk_identity.js
+      - name: Validate server-rendered Company title/favicon on initial Desk HTML
+        run: |
+          python3 -m py_compile saas_theme/branding.py
+          python3 scripts/test_initial_desk_branding.py
+      - name: Validate centered child-row editor and native Link actions
+        run: python3 scripts/test_child_editor_popover_layout.py
       - name: Validate company-branded production login and native auth flows
         run: |
           python3 -m py_compile saas_theme/www/login.py
