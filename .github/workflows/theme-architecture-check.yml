@@ -17,6 +17,7 @@ on:
       - 'scripts/test_report_list_readability.py'
       - 'scripts/test_grid_currency_link_icon_visibility.py'
       - 'scripts/test_overlay_link_suggestions.js'
+      - 'scripts/test_grid_external_link_popup.js'
       - 'scripts/test_native_grid_editor_popover.js'
       - 'scripts/test_desk_identity.js'
       - 'scripts/test_initial_desk_branding.py'
@@ -140,6 +141,10 @@ jobs:
         run: |
           node --check saas_theme/public/js/overlay_link_suggestions.js
           node scripts/test_overlay_link_suggestions.js
+      - name: Validate external Item Link menu top-layer and polished Link actions
+        run: |
+          node --check saas_theme/public/js/grid_external_link_popup.js
+          node scripts/test_grid_external_link_popup.js
       - name: Validate browser top-layer child editor and native Item Link lifecycle
         run: |
           node --check saas_theme/public/js/interaction_finish_v2.js
