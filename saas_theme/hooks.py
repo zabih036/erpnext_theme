@@ -22,7 +22,7 @@ app_include_css = [
 	"/assets/saas_theme/css/home.css?v=13",
 	"/assets/saas_theme/css/brand_shell.css?v=7",
 	"/assets/saas_theme/css/desk_identity.css?v=1",
-	"/assets/saas_theme/css/grid_editor_popover.css?v=1",
+	"/assets/saas_theme/css/grid_editor_popover.css?v=2",
 	"/assets/saas_theme/css/overlay_link_suggestions.css?v=1",
 	"/assets/saas_theme/css/palette.css?v=1",
 	"/assets/saas_theme/css/interface.css?v=1",
@@ -63,7 +63,7 @@ app_include_js = [
 	"/assets/saas_theme/js/home_dashboard.js?v=4",
 	"/assets/saas_theme/js/home_analytics.js?v=13",
 	"/assets/saas_theme/js/brand_shell.js?v=5",
-	"/assets/saas_theme/js/desk_identity.js?v=1",
+	"/assets/saas_theme/js/desk_identity.js?v=2",
 	"/assets/saas_theme/js/ui_finish.js?v=1",
 	"/assets/saas_theme/js/route_loader.js?v=1",
 	"/assets/saas_theme/js/mobile_shell.js?v=3",
@@ -89,4 +89,12 @@ web_include_css = "/assets/saas_theme/css/login_refinement.css?v=3"
 web_include_js = [
 	"/assets/saas_theme/js/route_loader.js?v=2",
 	"/assets/saas_theme/js/login_fix.js?v=3",
+]
+
+
+# Override the initial Frappe /desk <title> and <link rel="icon"> on the
+# server, before app_include_js is loaded. The callback itself is path-
+# restricted and does not alter public website or login pages.
+update_website_context = [
+	"saas_theme.branding.update_desk_branding_context",
 ]

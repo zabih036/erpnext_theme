@@ -1602,3 +1602,52 @@ selection, and fallback/teardown. Production ERPNext browser
 verification is still required for Purchase Invoice > Items > Edit >
 Item with click, keyboard, and mouse, and for other expanded child rows.
 
+### Expanded child-row centering, Link controls, and first Desk favicon (2026-11-25)
+
+The expanded child editor was positioned by
+`grid_editor_popover.css` using both `left:50%` and
+`inset-inline:auto !important`. Chromium resolves the latter to
+physical left:0; the subsequent `translateX(-50%)` then moves
+**half of the editor outside the viewport**. A local headless Chromium
+test measured x=-620px at 1915px viewport with the original CSS
+and x=337.5px with the centered correction; narrow widths follow
+the same centering rule in LTR/RTL.
+
+Because the editor now stays inside its original `.grid-row` using
+native `showPopover()`, legacy `body > .form-in-grid` rules for
+Link actions and inner form geometry no longer apply. The generic
+`.link-btn` styles then force clear/open icons visible even when
+Frappe has hidden the empty field, creating the extra outlined
+shapes beside Item. Card, form-area and section shadows also
+accumulate visually.
+
+`grid_editor_popover.css?v=2` now centers the *open* child popover
+using physical left/translate only; gives it one outer shadow and
+one scroll surface; removes stacked inner shadows; and restores
+Frappe's native Link clear/open show/hide state. The same original
+Awesomplete UL remains attached to the Item field and is shown as
+a second top-layer popup when open. No changes to lookup requests,
+model values or original Frappe click handlers. Normal Form links,
+Quick Entry and report tables are not affected.
+
+Frappe v16's `frappe/www/desk.html` initially renders
+`<title>{{ app_name }}</title>` and Frappe favicon links **before**
+`app_include_js` can run. Existing `desk_identity.js` therefore
+cannot avoid displaying "Frappe" during loading, regardless of
+later route/favicon repairs. `saas_theme.branding.update_desk_branding_context`
+is now a scoped `update_website_context` hook which runs after
+Frappe's Desk Python page context and replaces only the Desk
+initial `app_name`/`favicon` with the configured Company name and
+public Company Logo (or an existing public Website favicon, or a
+self-contained safe monogram). It does not affect Guest/public
+routes and never requests private Company File URLs.
+`desk_identity.js?v=2` preserves the already-valid server icon
+during its asynchronous branding fetch and suppresses Frappe-only
+placeholder page titles.
+
+Tests cover the physical centering contract, the missing Link
+action selector, real Python server-hook behavior (including
+Guest/private URL isolation), and existing Desk/controller regressions.
+The browser centering result was separately verified locally at
+wide and narrow viewport sizes. Live ERPNext testing remains
+necessary before merging into production.

@@ -15,8 +15,8 @@ const listeners = {};
 const jqEvents = {};
 const observed = [];
 const links = [
-	{ rel: "icon", attrs: {href: "/assets/frappe/images/frappe-favicon.svg", type: "image/x-icon"} },
-	{ rel: "shortcut icon", attrs: {href: "/assets/frappe/images/frappe-favicon.svg", type: "image/x-icon"} },
+	{ rel: "icon", attrs: {href: "/files/company-logo.png", type: "image/png"} },
+	{ rel: "shortcut icon", attrs: {href: "/files/company-logo.png", type: "image/png"} },
 ].map((item) => ({
 	rel: item.rel,
 	attrs: item.attrs,
@@ -136,9 +136,11 @@ sidebar.sidebar_data={label:"Accounts",header_icon:"accounting"};
 
 async function main() {
 	listeners.DOMContentLoaded();
-	assert.ok(links[0].attrs.href.startsWith("data:image/svg+xml,"), (
-		"Frappe favicon must be replaced before the Company logo request resolves"
+	assert.equal(links[0].attrs.href, "/files/company-logo.png", (
+		"Desk identity must preserve the real server-rendered Company icon until branding resolves"
 	));
+	assert.ok(source.includes("setFavicon(monogramFavicon("),
+		"Frappe-only icon fallback must remain available for older Desk pages");
 	await new Promise((resolve) => setTimeout(resolve, 10));
 	assert.deepEqual(imageUrls,["https://erp.example.test/files/company-logo.png"]);
 	assert.equal(doc.title,"Accounts Dashboard · Production Company");
@@ -162,6 +164,12 @@ async function main() {
 	assert.equal(doc.title,"Purchase Invoice · Production Company");
 	assert.equal(links[0].attrs.href,"https://erp.example.test/files/company-logo.png");
 	assert.equal(doc.title.split("Production Company").length,2,"company suffix must not duplicate");
+	doc.title="Frappe";
+	headObserver.callback([{type:"characterData",target:{
+		nodeName:"#text",parentNode:{nodeName:"TITLE"}},addedNodes:[]}]);
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	assert.equal(doc.title,"Production Company",
+		"Frappe's temporary startup placeholder must not appear in branded tab");
 	// Two controller evaluations must not add duplicate listeners.
 	vm.runInNewContext(source,sandbox);
 	assert.equal(observed.filter((o) => o.target === head).length,1);
