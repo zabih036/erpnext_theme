@@ -86,6 +86,13 @@
 		const suffix = " · " + company;
 		let current = String(document.title || "").trim();
 		if (!current || current === company || current.endsWith(suffix)) return;
+		// The initial /desk title is now rendered by the server. If Frappe
+		// temporarily resets it to its own placeholder during startup,
+		// never flash the literal "Frappe · Company" in the browser tab.
+		if (/^frappe(?: framework)?$/i.test(current)) {
+			document.title = company;
+			return;
+		}
 		// Keep Frappe's page title (e.g. Accounts Dashboard). Only replace
 		// its generic branding suffix, if present.
 		current = current.replace(/\s+[-|·]\s+Frappe(?: Framework)?$/i, "").trim();
@@ -238,11 +245,20 @@
 
 	function start() {
 		startHeadObserver();
-		// Replace Frappe's startup favicon immediately, before the optional
-		// company-branding request finishes. A valid public logo wins later.
-		setFavicon(monogramFavicon(
-			frappe.boot?.sysdefaults?.company || frappe.boot?.app_name || "Production"
-		));
+		// Frappe /desk now provides a real company favicon on the first
+		// server-rendered HTML response. Do NOT replace a valid company
+		// favicon with a generic monogram while a branding fetch runs.
+		const hasBrandedIcon = Array.from(
+			document.head?.querySelectorAll('link[rel~="icon"]') || []
+		).some((link) => {
+			const href = String(link.getAttribute("href") || "");
+			return href && !/\/assets\/frappe\/.*favicon/i.test(href);
+		});
+		if (!hasBrandedIcon) {
+			setFavicon(monogramFavicon(
+				frappe.boot?.sysdefaults?.company || frappe.boot?.app_name || "Production"
+			));
+		}
 		loadBranding();
 		syncSidebarIcon();
 
