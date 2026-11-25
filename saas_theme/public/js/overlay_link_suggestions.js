@@ -131,15 +131,21 @@
 		const meta = portals.get(list);
 		if (!meta) return;
 		portals.delete(list);
-		list.classList.remove(PORTAL_CLASS, "st-overlay-from-modal");
-		if (meta.marker.parentNode === meta.parent) {
-			meta.parent.insertBefore(list, meta.marker);
-		} else if (meta.parent.isConnected) {
-			meta.parent.appendChild(list);
+		if (meta.topLayer) {
+			if (list.matches(":popover-open")) list.hidePopover();
+			if (meta.previousPopover == null) list.removeAttribute("popover");
+			else list.setAttribute("popover", meta.previousPopover);
 		} else {
-			list.remove();
+			if (meta.marker.parentNode === meta.parent) {
+				meta.parent.insertBefore(list, meta.marker);
+			} else if (meta.parent.isConnected) {
+				meta.parent.appendChild(list);
+			} else {
+				list.remove();
+			}
+			meta.marker.remove();
 		}
-		meta.marker.remove();
+		list.classList.remove(PORTAL_CLASS, "st-overlay-from-modal");
 		if (meta.style === null) list.removeAttribute("style");
 		else list.setAttribute("style", meta.style);
 	}
@@ -150,9 +156,17 @@
 		if (!list || !open(list)) return;
 		const surface = surfaceFor(input);
 		if (!surface) return;
+		const topLayer = !surface.dialog &&
+			surface.element.matches(":popover-open") &&
+			typeof list.showPopover === "function" &&
+			typeof list.hidePopover === "function";
 		const known = portals.get(list);
 		if (known) {
-			if (known.input !== input || known.surface.element !== surface.element) {
+			if (known.input !== input || known.surface.element !== surface.element ||
+				known.topLayer !== topLayer) {
+				// An async Link lookup may open just before GridRowForm enters
+				// the browser top layer. Upgrade that existing body popup
+				// to a nested top-layer UL rather than leaving it behind.
 				restore(list);
 			} else {
 				position(list, known);
@@ -160,15 +174,33 @@
 			}
 		}
 		if (!list.parentNode) return;
-		const marker = document.createComment("st-overlay-native-awesomplete");
 		const parent = list.parentNode;
 		const style = list.getAttribute("style");
-		parent.insertBefore(marker, list);
-		const meta = { input, surface, parent, marker, style };
-		portals.set(list, meta);
+		const previousPopover = topLayer ? list.getAttribute("popover") : null;
+		const meta = { input, surface, parent, style, topLayer: false, marker: null };
 		list.classList.add(PORTAL_CLASS);
 		if (surface.dialog) list.classList.add("st-overlay-from-modal");
-		document.body.appendChild(list);
+		if (topLayer) {
+			// Keep Awesomplete's UL inside its ORIGINAL wrapper so the
+			// Frappe input's DOM ancestry and native option events remain
+			// intact. A second top-layer popover stacks above the editor.
+			list.setAttribute("popover", "manual");
+			try {
+				list.showPopover();
+				meta.topLayer = true;
+				meta.previousPopover = previousPopover;
+			} catch (_) {
+				if (previousPopover == null) list.removeAttribute("popover");
+				else list.setAttribute("popover", previousPopover);
+			}
+		}
+		if (!meta.topLayer) {
+			const marker = document.createComment("st-overlay-native-awesomplete");
+			parent.insertBefore(marker, list);
+			meta.marker = marker;
+			document.body.appendChild(list);
+		}
+		portals.set(list, meta);
 		position(list, meta);
 	}
 
@@ -247,7 +279,8 @@
 	// Frappe's async search callback and native Awesomplete click handler
 	// can complete. Do not stop propagation or replace selection events.
 	document.addEventListener("mousedown", event => {
-		if (event.target?.closest?.("body > ." + PORTAL_CLASS)) {
+		if (event.target?.closest?.("body > ." + PORTAL_CLASS +
+			", ." + PORTAL_CLASS + ":popover-open")) {
 			event.preventDefault();
 		}
 	}, true);

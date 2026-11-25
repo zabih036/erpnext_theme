@@ -51,7 +51,12 @@ class FakeNode {
 	getAttribute(k){return Object.hasOwn(this.attrs,k)?this.attrs[k]:null;}
 	removeAttribute(k){delete this.attrs[k];}
 	hasAttribute(k){return Object.hasOwn(this.attrs,k);}
-	matches(selector){return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));}
+	matches(selector){
+		if (selector === ":popover-open") return !!this.popoverOpen;
+		return this.nodeName==="UL" && (selector.includes("ul")||selector.includes("listbox"));
+	}
+	showPopover(){this.popoverOpen=true;}
+	hidePopover(){this.popoverOpen=false;}
 	getBoundingClientRect(){return this.rect;}
 	closest(selector){return this.nodeName==="UL" && selector.includes(".awesomplete") ? this.parentNode : null;}
 	contains(node){return this.children.includes(node);}
@@ -172,10 +177,42 @@ async function run(){
 	assert.equal(gridField.ul.parentNode,body,"expanded row UL escapes clipped grid body");
 	assert.equal(gridField.ul.style.values["z-index"][0],"15020","grid UL is below real dialogs");
 	assert.equal(win.saas_theme.overlay_link_diagnostics().surfaces[0],"grid-editor");
+	// Item suggestions can arrive while the editor is still being opened.
+	// They must migrate from body z-index to their ORIGINAL wrapper when
+	// the editor enters its own top layer, without losing option handlers.
+	editor.popoverOpen=true;
+	doc.activeElement=gridField.input;
+	signal("focusin",gridField.input);
+	flush();
+	assert.equal(gridField.ul.parentNode,gridField.wrapper,
+		"pending Link list upgrades from body to native nested popover");
+	assert.equal(gridField.ul.matches(":popover-open"),true);
+	editor.popoverOpen=false;
+	signal("focusin",gridField.input);
+	flush();
+	assert.equal(gridField.ul.parentNode,body,
+		"legacy overlay path remains available for non-popover dialogs");
 	gridField.ul.attrs.hidden="";
 	flush();
 	signal("awesomplete-close",gridField.input);
 	assert.equal(gridField.ul.parentNode,gridField.wrapper,"hidden grid suggestions return to field");
+	// A native popover GridRowForm must keep its Awesomplete UL INSIDE
+	// its original wrapper; a second top-layer popover gives options
+	// visual priority without detaching native Frappe click handlers.
+	editor.popoverOpen=true;
+	await opened(gridField);
+	assert.equal(gridField.ul.parentNode,gridField.wrapper,
+		"native editor's Link list must not be moved to body");
+	assert.equal(gridField.ul.matches(":popover-open"),true,
+		"Item options must open in a second native top layer");
+	assert.equal(gridField.ul.getAttribute("popover"),"manual");
+	gridField.ul.attrs.hidden="";
+	signal("awesomplete-close",gridField.input);
+	assert.equal(gridField.ul.parentNode,gridField.wrapper);
+	assert.equal(gridField.ul.matches(":popover-open"),false);
+	assert.equal(gridField.ul.getAttribute("popover"),null,
+		"restoring suggestions must not leave stale popover attributes");
+	editor.popoverOpen=false;
 	// The Purchase Invoice Item field can open before Frappe has finished
 	// moving the GridRowForm from an editable table row to <body>. It is
 	// an expanded child editor despite having an .editable-row ancestor.
