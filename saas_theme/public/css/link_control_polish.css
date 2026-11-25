@@ -142,6 +142,50 @@ body .frappe-control:is(
 	stroke-width: 1.8 !important;
 }
 
+/* precision.css replaces Frappe's native Open icon with a CSS pseudo-
+   graphic, while hiding the real SVG. Reuse Frappe's accessible SVG
+   once, with no duplicate pseudo icon. */
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn .btn-open::before {
+	content: none !important;
+	display: none !important;
+}
+body .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field .link-btn .btn-open svg {
+	display: block !important;
+}
+
+/* Existing RTL CSS has a much more specific selector and forces a
+   separate bordered action strip at the left. Override that geometry
+   only in genuine RTL Frappe form pages; preserve its row-reverse order
+   and the native hide/show controls. */
+html:is([dir="rtl"], [lang^="ps"], [lang^="fa"], [lang^="ar"], [lang^="ur"])
+body .form-page .form-layout .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field > .link-btn {
+	left: auto !important;
+	right: auto !important;
+	inset-inline-start: auto !important;
+	inset-inline-end: 6px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+
+html:is([dir="rtl"], [lang^="ps"], [lang^="fa"], [lang^="ar"], [lang^="ur"])
+body .form-page .form-layout .frappe-control:is(
+	[data-fieldtype="Link"], [data-fieldtype="Dynamic Link"]
+) .link-field > input:is(.form-control, .input-with-feedback) {
+	padding-left: 72px !important;
+	padding-right: 12px !important;
+	padding-inline-end: 72px !important;
+	padding-inline-start: 12px !important;
+}
+
+
 /* A separate searchable Link picker is often rendered beside <body>,
    outside the opened child editor. A regular z-index can NEVER pass
    the editor's native popover top layer. JS elevates only the picker
