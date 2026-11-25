@@ -61,7 +61,18 @@
 	}
 
 	function menuRoot(node) {
-		return node.closest(POPUP_ROOT) || node;
+		const knownRoot = node.closest(POPUP_ROOT);
+		if (knownRoot) return knownRoot;
+		// Some modern Link pickers wrap the listbox together with an
+		// embedded "Search Item…" input and footer. Promote the whole card,
+		// not just its options, so search/filter controls stay accessible.
+		const parent = node.parentElement;
+		if (parent && parent !== document.body &&
+			!parent.matches(".awesomplete, .form-in-grid, .frappe-control") &&
+			parent.querySelector('input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]')) {
+			return parent;
+		}
+		return node;
 	}
 
 	function isOwnedPopup(node, input) {
@@ -74,8 +85,8 @@
 
 		const ownedId = input.getAttribute("aria-controls") ||
 			input.getAttribute("aria-owns");
-		if (ownedId && (node.id === ownedId ||
-			node.querySelector('[id="' + CSS.escape(ownedId) + '"]'))) return true;
+		const controlled = ownedId && document.getElementById(ownedId);
+		if (controlled && (node === controlled || node.contains(controlled))) return true;
 
 		const inputRect = input.getBoundingClientRect();
 		const rect = node.getBoundingClientRect();
